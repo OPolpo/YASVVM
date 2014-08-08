@@ -16,8 +16,8 @@
             function initialize()
             {
                 var mapOptions = {
-                    //center: new google.maps.LatLng(45.563944, 10.231333),
-                    center: new google.maps.LatLng(0, 0),
+                    center: new google.maps.LatLng(45.563944, 10.231333),
+                    //center: new google.maps.LatLng(0, 0),
                     zoom: 16,
                     disableDefaultUI: true,
                     //panControl: true,
@@ -29,53 +29,53 @@
                     },
                 };
                 map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+                geocoder = new google.maps.Geocoder();
                 
-                // W3C Geolocation
-                /*if(navigator.geolocation)
-                {
-                    browserSupportFlag = true;
-                    alert("positione iniziale: "+navigator.geolocation.getCurrentPosition());
-                    navigator.geolocation.getCurrentPosition(function(position){
-                        initialLocation = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
-                        alert("positione iniziale: "+initialiLocation);
-                        map.setCenter(initialLocation);
+                // HTML5 geolocation
+                if(navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        var pos = new google.maps.LatLng(position.coords.latitude,
+                        position.coords.longitude);
+                        
+                        /*var infowindow = new google.maps.InfoWindow({
+                            map: map,
+                            position: pos,
+                            content: 'Location found using HTML5.'
+                        });*/
+                        
+                        //alert(pos+" , "+map.getCenter());
+                        map.setCenter(pos);
+                        //alert(pos+" , "+map.getCenter());
+                        continueInizialization();
+                    }, function() {
+                        // do nothing cause use default value, maybe an alert?
+                        //alert("attento, sono qui");
+                        alert("geolocalizzazione non attiva,\nti spostiamo sulla default location");
+                        continueInizialization();
                     });
-                }// else put to default location (unibs)*/
-        
-        // Try HTML5 geolocation
-  if(navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-      var pos = new google.maps.LatLng(position.coords.latitude,
-                                       position.coords.longitude);
-
-        alert(pos);
-
-      var infowindow = new google.maps.InfoWindow({
-        map: map,
-        position: pos,
-        content: 'Location found using HTML5.'
-      });
-
-      map.setCenter(pos);
-    }, function() {
-      // do nothing cause use default value, maybe an alert?
-    });
-  } else {
-    // Browser doesn't support Geolocation
-    // do nothing cause use default value, maybe an alert?
-  }
+                } else {
+                    // Browser doesn't support Geolocation
+                    // do nothing cause use default value, maybe an alert?
+                    //alert("attento, sono qui2");
+                    alert("geolocalizzazione non attiva,\nti spostiamo sulla default location");
+                    continueInizialization();
+                }
                 
+                //alert(map.getCenter());
+            }
+            
+            function continueInizialization()
+            {
                 streetViewService = new google.maps.StreetViewService();
                 streetViewLayer = new google.maps.StreetViewCoverageLayer();
                 streetViewLayer.setMap(map);
-                
-                //Check in a perimeter of 1000 meters 
                 initializeStartEndPosition();
             }
             
             function initializeStartEndPosition()
             {
-                streetViewService.getPanoramaByLocation(map.getCenter(), 50, function checkNearestStreetView(data, status){
+                //alert(map.getCenter());
+                streetViewService.getPanoramaByLocation(map.getCenter(), 100, function checkNearestStreetView(data, status){
                     if(status == google.maps.StreetViewStatus.OK)
                     {
                         //alert(data.location.latLng);
@@ -110,11 +110,8 @@
                         // add listner on drop, check if is a street view location
                         google.maps.event.addListener(startPositionMarker, 'dragend', checkStreetViewStart);
                         google.maps.event.addListener(endPositionMarker, 'dragend', checkStreetViewEnd);
-                    }
-                    else
-                    {
-                        alert(status);
-                        //alert("nessuna street view nelle vicinanze ["+map.getCenter()+"],\nti spostiamo sulla default location");
+                    } else {
+                        alert("nessuna street view nelle vicinanze, ti spostiamo sulla default location");
                         map.setCenter(new google.maps.LatLng(45.563944, 10.231333));
                         initializeStartEndPosition();
                     }
@@ -158,20 +155,11 @@
                     }
                 });
             }
-            
-            function stopBounce()
-            {
-                //if (endPositionMarker.getAnimation() != null)
-                //{
-                endPositionMarker.setAnimation(null);
-                google.maps.event.clearListeners(endPositionMarker, 'dragstart');
-                //}
-            }
-            
+                        
             google.maps.event.addDomListener(window, 'load', initialize);
         </script>
     </head>
     <body>
-        <div id="map-canvas"/>
+        <div id="map-canvas" ></div>
     </body>
 </html>
