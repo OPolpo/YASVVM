@@ -14,6 +14,7 @@
             var map, streetViewService, directionsDisplay, directionsService;
             var startPositionMarker, endPositionMarker, lastStartValidPosition, lastEndValidPosition;
             var routeMarker = [];
+            var total = 0;
             
             function initialize()
             {
@@ -202,20 +203,60 @@
                     {
                         //console.log(data);
                         directionsDisplay.setDirections(data);
-                        total=0;
-                        for(i=0; i<data.routes[0].legs[0].steps.length; i++)
+                        elaborateRoutes(data.routes[0].legs[0],0,0);
+                    }
+                });
+            }
+            
+            
+            function elaborateRoutes(data,i,j)
+            {
+                streetViewService.getPanoramaByLocation(data.steps[i].path[j], 5, function processSVData(svData, status){
+                    if(status == google.maps.StreetViewStatus.OK)
+                    {
+                        alreadyExist = false;
+                        for(k=1;k<=4&&routeMarker.length-k>=0;k++)
                         {
-                            for(j=0; j<data.routes[0].legs[0].steps[i].path.length; j++)
+                            if(routeMarker[routeMarker.length-k].pano == svData.location.pano)
                             {
-                                routeMarker[routeMarker.length] = new google.maps.Marker({
-                                    map: map,
-                                    position: data.routes[0].legs[0].steps[i].path[j],
-                                    title:"Step: ["+i+","+j+"]",
-                                });
-                                total++;
+                                alreadyExist = true;
+                                break;
                             }
                         }
-                        console.log(total);
+                        if(alreadyExist)
+                        {
+                            //console.log("already exist"+svData.location.pano);
+                        }
+                        else
+                        {
+                            routeMarker[routeMarker.length] = new google.maps.Marker({
+                                map: map,
+                                position: svData.location.latLng, //move from direct position to street map position,
+                                pano: svData.location.pano,
+                                //and usefull to check if exist or not street view image in that way
+                                title:"Step: ["+i+","+j+"]"
+                            });
+                            total++;
+                            console.log(total + " " +  svData.location.latLng + " " + svData.location.pano);
+                        }
+                    }
+                    else
+                    {
+                        console.log("no street view near route: "+status);
+                    }
+                    //prossimo punto
+                    j++;
+                    if(j<data.steps[i].path.length)
+                    {
+                        elaborateRoutes(data,i,j);
+                    }
+                    else
+                    {
+                        i++;
+                        if(i<data.steps.length)
+                        {
+                            elaborateRoutes(data,i,0);
+                        }
                     }
                 });
             }
