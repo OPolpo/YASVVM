@@ -18,31 +18,47 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <dirent.h>
+#include "yasvvm.h"
 
 using namespace cv;
 using namespace std;
 
-int do_video()
-{    
+vector <string> read_directory(const string & path);
+
+IplImage* interpole(IplImage* a, IplImage* b){
+    //IplImage* temp = cvCreateImage(cvGetSize(a), a->depth, a->nChannels);
+    IplImage* interpoled = cvCreateImage(cvGetSize(a), a->depth, a->nChannels);
+    //cvAdd(a, b, interpoled, NULL);
+    cvAddWeighted(a, 0.5, b, 0.5, 0.0, interpoled);
+    //cvAcc(b, temp); 
+    //cvConvertScale(interpoled, interpoled, 0.1, 0); 
+    return interpoled;
+}
+
+int do_video(string path){
+    vector <string> files = read_directory(path);
     int isColor = 1;
-    int fps     = 25;
-    int frameW  = 512;
-    int frameH  = 512;
+    int fps     = 12;
+    int frameW  = 320;
+    int frameH  = 240;
     CvSize size;
     
     size.width = frameW;
     size.height = frameH;
     CvVideoWriter* writer = cvCreateVideoWriter("out.avi", CV_FOURCC('m','p','4','v'), fps, size, isColor);
-    IplImage* img = 0;
-    img = cvLoadImage("Lenna.png",CV_LOAD_IMAGE_COLOR);
-    //cvShowImage("ss", img);
-    //waitKey(0);
-    
-    for(int counter=0; counter < 500; counter++)
-    {
-        cout << "aggiungo" << endl;
-        
-        cvWriteFrame(writer, img);
+    IplImage* frame = 0;
+    IplImage* old_frame = cvLoadImage("frames/thumbs-up-01 (dragged).jpg",CV_LOAD_IMAGE_COLOR);
+    IplImage* interpolated_frame = 0;
+    unsigned long i;
+    for (i = 0; i < files.size(); i++){
+        string link ("frames/");
+        link += files.at(i).c_str();
+        printf("apro %s\n", link.c_str());
+        frame = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+        interpolated_frame = interpole(frame, old_frame);
+        cvWriteFrame(writer, interpolated_frame);
+        cvWriteFrame(writer, frame);
+        old_frame = frame;
     }
     cvReleaseVideoWriter(&writer);
     return 0;
@@ -57,66 +73,66 @@ vector <string> read_directory(const string & path = string()){
     if (dp){
         while (true){
             errno = 0;
-            de = readdir( dp );
-            if (de == NULL) break;
-            result.push_back( string( de->d_name ) );
+            de = readdir(dp);
+            if (de == NULL)
+                break;
+            if (strlen(de->d_name) > 4 && strcmp((de->d_name) + strlen(de->d_name) - 4, ".jpg")==0) 
+                result.push_back( string( de->d_name ) );
         }
         closedir( dp );
         sort( result.begin(), result.end() );
     }
-    for (int i = 0; i < result.size(); ++i){
-        printf("%s\n", result.at(i).c_str());        
-    }
+    // for (int i = 0; i < result.size(); ++i){
+    //     printf("%s\n", result.at(i).c_str());        
+    // }
     return result;
 }
 
 
-static xmlrpc_value * sample_add(xmlrpc_env *   const envP,
-           xmlrpc_value * const paramArrayP,
-           void *         const serverInfo,
-           void *         const channelInfo) {
+// static xmlrpc_value * sample_add(xmlrpc_env *   const envP,
+//                                  xmlrpc_value * const paramArrayP,
+//                                  void *         const serverInfo,
+//                                  void *         const channelInfo) {
     
-    xmlrpc_int32 x, y, z;
+//     xmlrpc_int32 x, y, z;
     
-    /* Parse our argument array. */
-    xmlrpc_decompose_value(envP, paramArrayP, "(ii)", &x, &y);
-    if (envP->fault_occurred)
-      return NULL;
+//     xmlrpc_decompose_value(envP, paramArrayP, "(ii)", &x, &y);
+//     if (envP->fault_occurred)
+//         return NULL;
     
-    z = x + y;
+//     z = x + y;
     
-    return xmlrpc_build_value(envP, "i", z);
-}
+//     return xmlrpc_build_value(envP, "i", z);
+// }
 
-static xmlrpc_value * xmlrpc_read_dir(xmlrpc_env *   const envP,
-           xmlrpc_value * const paramArrayP,
-           void *         const serverInfo,
-           void *         const channelInfo){
-    read_directory("frames");
-    xmlrpc_int32 z;
-    z=0;
-    return xmlrpc_build_value(envP, "i", z);;
-}
+// static xmlrpc_value * xmlrpc_read_dir(xmlrpc_env *   const envP,
+//                                       xmlrpc_value * const paramArrayP,
+//                                       void *         const serverInfo,
+//                                       void *         const channelInfo){
+//     read_directory("frames");
+//     xmlrpc_int32 z;
+//     z=0;
+//     return xmlrpc_build_value(envP, "i", z);;
+// }
 
 static xmlrpc_value * xmlrpc_do_video(xmlrpc_env *   const envP,
-           xmlrpc_value * const paramArrayP,
-           void *         const serverInfo,
-           void *         const channelInfo){
-    do_video();
+                                      xmlrpc_value * const paramArrayP,
+                                      void *         const serverInfo,
+                                      void *         const channelInfo){
+    char * s;
+    xmlrpc_decompose_value(envP, paramArrayP, "(s)", &s);
+    do_video("frames");
     xmlrpc_int32 z;
     z=0;
     return xmlrpc_build_value(envP, "i", z);;
 }
 
 
+int main(int const argc, const char ** const argv) {
+    do_video("frames");
+    // struct xmlrpc_method_info3 const methodInfo = {"sample.add",  &sample_add};
 
-int
-main(int           const argc,
-     const char ** const argv) {
-    
-    struct xmlrpc_method_info3 const methodInfo = {"sample.add",  &sample_add};
-
-    struct xmlrpc_method_info3 const methodInforeaddir = {"xmlrpc.read_dir", &xmlrpc_read_dir};
+    // struct xmlrpc_method_info3 const methodInforeaddir = {"xmlrpc.read_dir", &xmlrpc_read_dir};
 
     struct xmlrpc_method_info3 const methodInfovideo = {"xmlrpc.do_video", &xmlrpc_do_video};
 
@@ -141,12 +157,12 @@ main(int           const argc,
         exit(1);
     }
     
-    xmlrpc_registry_add_method3(&env, registryP, &methodInfo);
-    if (env.fault_occurred) {
-        printf("xmlrpc_registry_add_method3() failed.  %s\n",
-               env.fault_string);
-        exit(1);
-    }
+    // xmlrpc_registry_add_method3(&env, registryP, &methodInfo);
+    // if (env.fault_occurred) {
+    //     printf("xmlrpc_registry_add_method3() failed.  %s\n",
+    //            env.fault_string);
+    //     exit(1);
+    // }
 
     xmlrpc_registry_add_method3(&env, registryP, &methodInfovideo);
     if (env.fault_occurred) {
@@ -155,12 +171,12 @@ main(int           const argc,
         exit(1);
     }
 
-    xmlrpc_registry_add_method3(&env, registryP, &methodInforeaddir);
-    if (env.fault_occurred) {
-        printf("xmlrpc_registry_add_method3() failed.  %s\n",
-               env.fault_string);
-        exit(1);
-    }
+    // xmlrpc_registry_add_method3(&env, registryP, &methodInforeaddir);
+    // if (env.fault_occurred) {
+    //     printf("xmlrpc_registry_add_method3() failed.  %s\n",
+    //            env.fault_string);
+    //     exit(1);
+    // }
     
     serverparm.config_file_name = NULL;   /* Select the modern normal API */
     serverparm.registryP        = registryP;
@@ -174,7 +190,6 @@ main(int           const argc,
         printf("xmlrpc_server_abyss() failed.  %s\n", env.fault_string);
         exit(1);
     }
-    /* xmlrpc_server_abyss() never returns unless it fails */
     
     return 0;
 }
