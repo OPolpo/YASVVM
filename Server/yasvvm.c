@@ -19,6 +19,7 @@
 #include <iostream>
 #include <dirent.h>
 #include "yasvvm.h"
+#include <string.h>
 
 using namespace cv;
 using namespace std;
@@ -28,17 +29,36 @@ using namespace std;
 
 vector <string> read_directory(const string & path);
 
-IplImage* createFrame(IplImage* a, IplImage* b, IplImage* c){
-    IplImage* merged = cvCreateImage(cvSize(WIDTH*3, HEIGHT), a->depth, a->nChannels);
-    cout << a->nChannels << endl;
-    cout << a->depth << endl;
+// IplImage* createFrame(IplImage* ah, IplImage* bh, IplImage* ch, IplImage* al, IplImage* bl, IplImage* cl){
+//     IplImage* merged = cvCreateImage(cvSize(WIDTH*3, HEIGHT*2), al->depth, al->nChannels);
+
+
+//     int i,j,k=0;
+//     for(i = 0; i < HEIGHT; i++)
+//         for(j = 0; j < WIDTH; j++)
+//             for(k = 0; k < 3; k++){
+//                 merged->imageData[i * WIDTH*3*3 + j * 3 + k] = ah->imageData[i * WIDTH*3 + j * 3 + k];
+//                 merged->imageData[i * WIDTH*3*3 + (j + WIDTH) * 3 + k] = bh->imageData[i * WIDTH*3 + j * 3 + k];
+//                 merged->imageData[i * WIDTH*3*3 + (j + WIDTH*2) * 3 + k] = ch->imageData[i * WIDTH*3 + j * 3 + k];
+//                 merged->imageData[(i + HEIGHT) * WIDTH*3*3 + j * 3 + k] = al->imageData[i * WIDTH*3 + j * 3 + k];
+//                 merged->imageData[(i + HEIGHT) * WIDTH*3*3 + (j + WIDTH) * 3 + k] = bl->imageData[i * WIDTH*3 + j * 3 + k];
+//                 merged->imageData[(i + HEIGHT) * WIDTH*3*3 + (j + WIDTH*2) * 3 + k] = cl->imageData[i * WIDTH*3 + j * 3 + k];
+//             }
+
+//     //cvShowImage("image", merged);
+//     return merged;
+// }
+
+    IplImage* createFrame(IplImage* a, IplImage* b){
+    IplImage* merged = cvCreateImage(cvSize(WIDTH*2, HEIGHT), a->depth, a->nChannels);
+
+
     int i,j,k=0;
     for(i = 0; i < HEIGHT; i++)
         for(j = 0; j < WIDTH; j++)
             for(k = 0; k < 3; k++){
-                merged->imageData[i * WIDTH*3*3 + j * 3 + k] = a->imageData[i * WIDTH*3 + j * 3 + k];
-                merged->imageData[i * WIDTH*3*3 + (j + WIDTH) * 3 + k] = b->imageData[i * WIDTH*3 + j * 3 + k];
-                merged->imageData[i * WIDTH*3*3 + (j + WIDTH*2) * 3 + k] = c->imageData[i * WIDTH*3 + j * 3 + k];
+                merged->imageData[i * WIDTH*2*3 + j * 3 + k] = a->imageData[i * WIDTH*3 + j * 3 + k];
+                merged->imageData[i * WIDTH*2*3 + (j + WIDTH) * 3 + k] = b->imageData[i * WIDTH*3 + j * 3 + k];
             }
 
     //cvShowImage("image", merged);
@@ -51,11 +71,40 @@ IplImage* interpole(IplImage* a, IplImage* b){
     return interpoled;
 }
 
+double getx(String s){
+    char * pch;
+    char cp[40];
+    strcpy(cp, s.c_str());
+    pch = strtok(cp,"-");
+    pch = strtok (NULL, "-");
+    return atof(pch);
+}
+
+double gety(String s){
+    char * pch;
+    char cp[30];
+    strcpy(cp, s.c_str());
+    pch = strtok(cp,"-");
+    pch = strtok (NULL, "-");
+    pch = strtok (NULL, "-");
+    pch[strlen(pch)-4] = 0;
+    return atof(pch);
+}
+
+double distance (String a, String b){
+    double ax = getx(a);
+    double bx = getx(b);
+    double ay = gety(a);
+    double by = gety(b);
+
+    return sqrt(pow((ax - bx),2) + pow((ax - bx),2));
+}
+
 int do_video(string path){
     vector <string> files = read_directory(path);
     int isColor = 1;
     int fps     = 1;
-    int frameW  = WIDTH * 3;
+    int frameW  = WIDTH;
     int frameH  = HEIGHT;
     CvSize size;
     
@@ -63,9 +112,17 @@ int do_video(string path){
     size.height = frameH;
     CvVideoWriter* writer = cvCreateVideoWriter("out.avi", CV_FOURCC('m','p','4','v'), fps, size, isColor);
     IplImage* frame = 0;
-    IplImage* dx = 0;
-    IplImage* center = 0;
-    IplImage* sx = 0;
+    // IplImage* dxh = 0;
+    // IplImage* centerh = 0;
+    // IplImage* sxh = 0;
+    // IplImage* dxl = 0;
+    // IplImage* centerl = 0;
+    // IplImage* sxl = 0;
+
+    // IplImage* sx = 0;
+    // IplImage* dx = 0;
+
+    IplImage* f = 0;
 
     //IplImage* old_frame = cvLoadImage("frames/thumbs-up-01 (dragged).jpg",CV_LOAD_IMAGE_COLOR);
     //IplImage* interpolated_frame = 0;
@@ -76,26 +133,68 @@ int do_video(string path){
     //createFrame(old_frame,old_frame,old_frame);
     unsigned long i;
     for (i = 0; i < files.size();){
+        // string link ("frames/");
+        // link += files.at(i++).c_str();
+        // printf("apro %s ch\n", link.c_str());
+        // centerh = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+
+        // link = "frames/";
+        // link += files.at(i++).c_str();
+        // printf("apro %s cl\n", link.c_str());
+        // centerl = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+
+        // link = "frames/";
+        // link += files.at(i++).c_str();
+        // printf("apro %s sxh\n", link.c_str());
+        // sxh = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+
+        // link = "frames/";
+        // link += files.at(i++).c_str();
+        // printf("apro %s sxl\n", link.c_str());
+        // sxl = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+
+        // link = "frames/";
+        // link += files.at(i++).c_str();
+        // printf("apro %s dxh\n", link.c_str());
+        // dxh = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+
+        // link = "frames/";
+        // link += files.at(i++).c_str();
+        // printf("apro %s dxl\n", link.c_str());
+        // dxl = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+
+
+        // TWO IMAGES VERSION
+
+        // string link ("frames/");
+        // link += files.at(i++).c_str();
+        // printf("apro %s sx\n", link.c_str());
+        // sx = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+
+        // link = "frames/";
+        // link += files.at(i++).c_str();
+        // printf("apro %s dx\n", link.c_str());
+        // dx = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+
+        string filename = files.at(i).c_str();
+        string filename_old = (i == 0) ? files.at(i).c_str() : files.at(i-1).c_str();
+
         string link ("frames/");
         link += files.at(i++).c_str();
-        printf("apro %s\n", link.c_str());
-        center = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+        printf("apro %s \n", link.c_str());
+        f = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
 
-        link = "frames/";
-        link += files.at(i++).c_str();
-        printf("apro %s\n", link.c_str());
-        dx = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+        cout.precision(10);
+        cout << distance(filename, filename_old) << endl;
 
-        link = "frames/";
-        link += files.at(i++).c_str();
-        printf("apro %s\n", link.c_str());
-        sx = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
-
-        frame = createFrame(sx,center,dx);
+        //frame = createFrame(sxh,centerh,dxh,sxl,centerl,dxl);
+        //frame = createFrame(sx, dx);
 
         //interpolated_frame = interpole(frame, old_frame);
         //cvWriteFrame(writer, interpolated_frame);
-        cvWriteFrame(writer, frame);
+        //cvWriteFrame(writer, frame);
+        cvWriteFrame(writer, f);
+
         //old_frame = frame;
     }
     cvReleaseVideoWriter(&writer);
