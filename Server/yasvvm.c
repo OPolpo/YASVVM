@@ -23,42 +23,80 @@
 using namespace cv;
 using namespace std;
 
+#define WIDTH 640
+#define HEIGHT 640
+
 vector <string> read_directory(const string & path);
 
+IplImage* createFrame(IplImage* a, IplImage* b, IplImage* c){
+    IplImage* merged = cvCreateImage(cvSize(WIDTH*3, HEIGHT), a->depth, a->nChannels);
+    cout << a->nChannels << endl;
+    cout << a->depth << endl;
+    int i,j,k=0;
+    for(i = 0; i < HEIGHT; i++)
+        for(j = 0; j < WIDTH; j++)
+            for(k = 0; k < 3; k++){
+                merged->imageData[i * WIDTH*3*3 + j * 3 + k] = a->imageData[i * WIDTH*3 + j * 3 + k];
+                merged->imageData[i * WIDTH*3*3 + (j + WIDTH) * 3 + k] = b->imageData[i * WIDTH*3 + j * 3 + k];
+                merged->imageData[i * WIDTH*3*3 + (j + WIDTH*2) * 3 + k] = c->imageData[i * WIDTH*3 + j * 3 + k];
+            }
+
+    //cvShowImage("image", merged);
+    return merged;
+}
+
 IplImage* interpole(IplImage* a, IplImage* b){
-    //IplImage* temp = cvCreateImage(cvGetSize(a), a->depth, a->nChannels);
     IplImage* interpoled = cvCreateImage(cvGetSize(a), a->depth, a->nChannels);
-    //cvAdd(a, b, interpoled, NULL);
     cvAddWeighted(a, 0.5, b, 0.5, 0.0, interpoled);
-    //cvAcc(b, temp); 
-    //cvConvertScale(interpoled, interpoled, 0.1, 0); 
     return interpoled;
 }
 
 int do_video(string path){
     vector <string> files = read_directory(path);
     int isColor = 1;
-    int fps     = 12;
-    int frameW  = 320;
-    int frameH  = 240;
+    int fps     = 1;
+    int frameW  = WIDTH * 3;
+    int frameH  = HEIGHT;
     CvSize size;
     
     size.width = frameW;
     size.height = frameH;
     CvVideoWriter* writer = cvCreateVideoWriter("out.avi", CV_FOURCC('m','p','4','v'), fps, size, isColor);
     IplImage* frame = 0;
-    IplImage* old_frame = cvLoadImage("frames/thumbs-up-01 (dragged).jpg",CV_LOAD_IMAGE_COLOR);
-    IplImage* interpolated_frame = 0;
+    IplImage* dx = 0;
+    IplImage* center = 0;
+    IplImage* sx = 0;
+
+    //IplImage* old_frame = cvLoadImage("frames/thumbs-up-01 (dragged).jpg",CV_LOAD_IMAGE_COLOR);
+    //IplImage* interpolated_frame = 0;
+    //IplImage* a = cvLoadImage("0-1.jpg",CV_LOAD_IMAGE_COLOR);
+    //IplImage* b = cvLoadImage("0-2.jpg",CV_LOAD_IMAGE_COLOR);
+    //IplImage* c = cvLoadImage("0-3.jpg",CV_LOAD_IMAGE_COLOR);
+    //createFrame(a,b,c);
+    //createFrame(old_frame,old_frame,old_frame);
     unsigned long i;
-    for (i = 0; i < files.size(); i++){
+    for (i = 0; i < files.size();){
         string link ("frames/");
-        link += files.at(i).c_str();
+        link += files.at(i++).c_str();
         printf("apro %s\n", link.c_str());
-        frame = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
-        interpolated_frame = interpole(frame, old_frame);
-        cvWriteFrame(writer, interpolated_frame);
+        center = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+
+        link = "frames/";
+        link += files.at(i++).c_str();
+        printf("apro %s\n", link.c_str());
+        dx = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+
+        link = "frames/";
+        link += files.at(i++).c_str();
+        printf("apro %s\n", link.c_str());
+        sx = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
+
+        frame = createFrame(sx,center,dx);
+
+        //interpolated_frame = interpole(frame, old_frame);
+        //cvWriteFrame(writer, interpolated_frame);
         cvWriteFrame(writer, frame);
-        old_frame = frame;
+        //old_frame = frame;
     }
     cvReleaseVideoWriter(&writer);
     return 0;

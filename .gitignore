@@ -4,3 +4,7 @@ Server/yasvvm.dSYM/Contents/Resources/DWARF/yasvvm
 Server/yasvvm
 
 *.plist
+/aframes
+Server/out.avi
+
+*.avi
