@@ -4,14 +4,42 @@ var directionsDisplay;
 var directionsService;
 var startPositionMarker;
 var endPositionMarker;
-var lastStartValidPosition;
-var lastEndValidPosition;
+//var lastStartValidPosition;
+//var lastEndValidPosition;
 var routeMarker = [];
 var total;
 var used;
 
 //var defaultLocation = new google.maps.LatLng(40.760510, -73.976063);
 var defaultLocation = new google.maps.LatLng(45.563944, 10.231333);
+
+var startPositionMarkerIcon = "http://maps.google.com/mapfiles/kml/paddle/go.png";
+var endPositionMarkerIcon = "http://maps.google.com/mapfiles/kml/paddle/stop.png";
+var normalMarkerIcon = "http://maps.google.com/mapfiles/kml/paddle/blu-blank.png";
+var disabledMarkerIcon = "http://maps.google.com/mapfiles/kml/paddle/wht-blank.png";
+
+/*function roundFun(num, decimals)
+{
+    return Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals);
+}*/
+
+function lanLngDistance(latLngStart, latLngEnd)
+{
+  latDiff = latLngEnd.k - latLngStart.k;
+  lngDiff = latLngEnd.B - latLngStart.B;
+  return Math.sqrt((latDiff*latDiff)+(lngDiff*lngDiff));
+}
+
+function lanLngBetween(latLngStart, latLngEnd, numberOfSlice)
+{
+    latDiff = latLngEnd.k - latLngStart.k;
+    lngDiff = latLngEnd.B - latLngStart.B;
+    newLatLng = new google.maps.LatLng(latLngStart.k+(latDiff/numberOfSlice), latLngStart.B+(lngDiff/numberOfSlice));
+    return newLatLng;
+}
+
+/*point.x = start.x + (final.x - start.x) * progress;
+point.y = start.y + (final.y - start.y) * progress;*/
 
 function yassvmInitializer()
 {
@@ -91,21 +119,21 @@ function addStartEndPosition(data, callbackData)
 {
     startPositionMarker = new google.maps.Marker({
         position: data.location.latLng,
+        lastValidPosition: data.location.latLng,
         draggable:true,
-        //labelClass: "labels", // the CSS class for the label
-        //labelInBackground: false
-        title:"StartPosition"
+        icon: startPositionMarkerIcon,
+        title:"StartPosition",
     });
     
-    lastValidStartPosition = startPositionMarker.position;
+    //lastValidStartPosition = startPositionMarker.position;
     
     endPositionMarker = new google.maps.Marker({
         position: data.location.latLng,
+        lastValidPosition: data.location.latLng,
         draggable:true,
-        title:"EndPosition"
+        icon: endPositionMarkerIcon,
+        title:"EndPosition",
     });
-    
-    lastValidEndPosition = endPositionMarker.position;
     
     startPositionMarker.setMap(map);
     endPositionMarker.setMap(map);
@@ -154,15 +182,16 @@ function checkStreetView(location, startRange, endRange, stepRange, okCallback, 
 
 function streetViewCheckerStart(data)
 {
-    streetViewChecker(startPositionMarker, data);
+    streetViewChecker(data, startPositionMarker);
 }
 
 function streetViewCheckerEnd(data)
 {
-    streetViewChecker(endPositionMarker, data);
+    streetViewChecker(data, endPositionMarker);
 }
 
-function streetViewChecker(marker, data)
+//function streetViewChecker(marker, data)
+function streetViewChecker(data, marker)
 {
     checkStreetView(data.latLng, 5, 25, 5, okStreetViewChecker, errorStreetViewChecker, marker);
 }
@@ -170,7 +199,9 @@ function streetViewChecker(marker, data)
 function okStreetViewChecker(data, marker)
 {
     marker.setPosition(data.location.latLng);
-    if(marker == startPositionMarker)
+    marker.lastValidPosition = marker.position;
+    calculateRoute();
+    /*if(marker == startPositionMarker)
     {
         lastValidStartPosition = startPositionMarker.position;
         //startPositionMarker.setMap(map);
@@ -183,12 +214,19 @@ function okStreetViewChecker(data, marker)
         //endPositionMarker.setMap(map);
         //endPositionMarker.setAnimation(google.maps.Animation.DROP);
         calculateRoute();
-    }
+    }*/
+    
 }
 
 function errorStreetViewChecker(data, marker)
 {
-    if(marker == startPositionMarker)
+    marker.setPosition(marker.lastValidPosition);
+    if(startPositionMarker.position == endPositionMarker.position)
+    {
+        endPositionMarker.setMap(map);
+        endPositionMarker.setAnimation(google.maps.Animation.BOUNCE);
+    }
+    /*if(marker == startPositionMarker)
     {
         marker.setPosition(lastValidStartPosition);
         //startPositionMarker.setAnimation(google.maps.Animation.DROP);
@@ -201,7 +239,7 @@ function errorStreetViewChecker(data, marker)
             endPositionMarker.setMap(map);
             endPositionMarker.setAnimation(google.maps.Animation.BOUNCE);
         }
-    }
+    }*/
 }
 
 function lockMarkers()
@@ -230,6 +268,109 @@ function unlockMarkers()
     //endPositionMarker
     endPositionMarker.setDraggable(true);
     endPositionMarker.setAnimation(null);
+    //add information box to all marker
+    for(i=1;i<routeMarker.length-1;i++)
+    {
+        /*google.maps.event.addListener(routeMarker[i], 'dblclick', function(e)
+        {
+            alert("doubleclicked: "+e);
+        });*/
+        routeMarker[i].setDraggable(true);
+        markerPosition = i;
+        google.maps.event.addListener(routeMarker[markerPosition], 'dragend', function streetViewCheckMarker()
+        {
+            //console.log(this);
+            //colora di grigio
+            lockMarkers();
+            this.setIcon(disabledMarkerIcon);
+            this.setDraggable(false);
+            checkStreetView(this.position, 1, 21, 1, streetViewCheckMarkerOk, streetViewCheckMarkerError, this);
+            //streetViewChecker(data, routeMarker[i]);
+        });
+    
+    // add listner on drop, check if is a street view location
+    //google.maps.event.addListener(startPositionMarker, 'dragend', streetViewCheckerStart);
+    //google.maps.event.addListener(endPositionMarker, 'dragend', streetViewCheckerEnd);
+        /*google.maps.event.addListener(endPositionMarker, 'dragstart', function stopBounce()
+    {
+        endPositionMarker.setAnimation(null);
+        //google.maps.event.clearListeners(endPositionMarker, 'dragstart');
+    });
+    
+    // add listner on drop, check if is a street view location
+    google.maps.event.addListener(startPositionMarker, 'dragend', streetViewCheckerStart);
+    google.maps.event.addListener(endPositionMarker, 'dragend', streetViewCheckerEnd);*/
+    }
+}
+
+function streetViewCheckMarkerOk(data, marker)
+{
+    marker.position = data.location.latLng;
+    marker.lastValidPosition = data.location.latLng;
+    streetViewCheckMarkerEnd(data, marker);
+}
+
+function streetViewCheckMarkerError(data, marker)
+{
+    marker.position = marker.lastValidPosition;
+    streetViewCheckMarkerEnd(data, marker);
+}
+
+function streetViewCheckMarkerEnd(data, marker)
+{
+    marker.setDraggable(true);
+    marker.setIcon(normalMarkerIcon);
+    marker.setMap(map);
+    marker.setAnimation(google.maps.Animation.DROP);
+    unlockMarkers();
+}
+
+function addUniqueSvMarker(svData)
+{
+    alreadyExist = false;
+    for(k=1;k<=4&&routeMarker.length-k>=0;k++)
+    {
+        if(routeMarker[routeMarker.length-k].pano == svData.location.pano)
+        {
+            alreadyExist = true;
+            break;
+        }
+    }
+    if(alreadyExist)
+    {
+        total++;
+        //console.log(total + " " + "already exist"+svData.location.pano);
+    }
+    else
+    {
+        routeMarker[routeMarker.length] = new google.maps.Marker({
+            map: map,
+            position: svData.location.latLng, //move from direct position to street map position,
+            pano: svData.location.pano,
+            lastValidPosition: svData.location.latLng,
+            //and usefull to check if exist or not street view image in that way
+            icon: normalMarkerIcon,
+            title: "routeMarker "+routeMarker.length,
+            animation: google.maps.Animation.DROP,
+        });
+        //console.log(routeMarker[routeMarker.length-1]);
+        //google.maps.event.addListener(routeMarker[routeMarker.length-1], 'dragend', function streetViewCheckerMarker(data)
+        //{
+        //    console.log(routeMarker.length-1);
+            //checkStreetView(routeMarker[i].latLng, 1, 21, 1, streetViewCheckerMarkerOk, streetViewCheckerMarkerError, routeMarker[i]);
+            //streetViewChecker(data, routeMarker[i]);
+        //});
+        //endPositionMarker.setAnimation(google.maps.Animation.DROP);
+        total++;
+        used++;
+        dDP = 0;
+        if(routeMarker.length>1)
+        {
+            dDP = google.maps.geometry.spherical.computeDistanceBetween(routeMarker[routeMarker.length-2].position, routeMarker[routeMarker.length-1].position);
+        }
+        // log utile
+        //console.log(used+"("+total + ") " +  svData.location.latLng + " " + svData.location.pano + " distanza dal precedente: " +dDP);
+    }
 }
 
 function calculateRoute()
@@ -241,8 +382,8 @@ function calculateRoute()
         routeMarker.splice(routeMarker.length-1,1);
     }
     var request = {
-        origin: lastValidStartPosition,
-        destination: lastValidEndPosition,
+        origin: startPositionMarker.lastValidPosition,
+        destination: endPositionMarker.lastValidPosition,
         // Note that Javascript allows us to access the constant
         // using square brackets and a string value as its
         // "property."
@@ -268,18 +409,57 @@ function calculateRoute()
                     k++;
                 }
             }
-            console.log("Numero di elementi da elaborare: "+dataToElab.length);
-            maxDistanceBetweenPoints = 10.0;
+            //log utile
+            //console.log("Numero di elementi da elaborare: "+dataToElab.length);
+            //maxDistanceBetweenPoints = 0.5;
+            maxDistanceBetweenPoints = 10;
             for(i=1;i<dataToElab.length;i++)
             {
+                //console.log(dataToElab[i-1]);
+                //console.log(lanLngBetween(dataToElab[i-1], dataToElab[i], 2));
+                //console.log(dataToElab[i]);
+                //return;
                 distanceBetweenPoints = google.maps.geometry.spherical.computeDistanceBetween(dataToElab[i-1], dataToElab[i]);
+                //distanceBetweenPoints = lanLngDistance(dataToElab[i-1], dataToElab[i]);
                 //console.log(distanceBetweenPoints);
                 if(distanceBetweenPoints > maxDistanceBetweenPoints) 
                 {
-                    //interpolate(from:LatLng, to:LatLng, fraction:number)
                     numberOfPoint = Math.ceil(distanceBetweenPoints/maxDistanceBetweenPoints);
                     fraction = 1.0/numberOfPoint;
                     newPoint = google.maps.geometry.spherical.interpolate(dataToElab[i-1], dataToElab[i], fraction);
+                    //newPoint = lanLngBetween(dataToElab[i-1], dataToElab[i], numberOfPoint);
+                    dataToElab.splice(i, 0, newPoint);
+                    // da togliere
+                    /*new google.maps.Marker({
+                        map: map,
+                        position: newPoint, //move from direct position to street map position,
+                        //pano: svData.location.pano,
+                        //and usefull to check if exist or not street view image in that way
+                        title: "StreetView Point Marker",
+                        //animation: google.maps.Animation.DROP,
+                    });*/
+                }
+                    //alert("distanceBetweenPoints: "+distanceBetweenPoints+"\n"+
+                    //      "numberOfPoint: "+numberOfPoint+"\n"+
+                    //      "fraction: "+fraction+"\n"+
+                    //      "point[i-1]: "+dataToElab[i-1]+"\n"+
+                    //      "point[i]: "+dataToElab[i]+"\n"+
+                    //      "newPoint: "+newPoint+"\n");
+                    //if(newPoint == dataToElab[i-1]) //loop
+                    //{
+                    //    alert("distanceBetweenPoints: "+distanceBetweenPoints+"\n"+
+                    //      "numberOfPoint: "+numberOfPoint+"\n"+
+                    //      "fraction: "+fraction+"\n"+
+                    //      "point[i-1]: "+dataToElab[i-1]+"\n"+
+                    //      "point[i]: "+dataToElab[i]+"\n"+
+                    //      "newPoint: "+newPoint+"\n");
+                        //fraction = roundFun(fraction,2);
+                        //newPoint = google.maps.geometry.spherical.interpolate(dataToElab[i-1], dataToElab[i], fraction);
+                    //}
+                    //else
+                    //{
+                    //    dataToElab.splice(i, 0, newPoint);
+                    //}
                     //console.log(google.maps.geometry.spherical.computeDistanceBetween(dataToElab[i-1], newPoint));
                     //console.log(dataToElab[i-1], newPoint, dataToElab[i]);
                     /*new google.maps.Marker({
@@ -288,21 +468,22 @@ function calculateRoute()
                         title:"Marker2",
                         animation: google.maps.Animation.BOUNCE,
                     });*/
-                    dataToElab.splice(i, 0, newPoint);
                     //console.log(numberOfPoint);
                     /*for(k=0;k<numberOfPoint;k++)
                     {
                         newPoint = google.maps.geometry.spherical.interpolate(dataToElab[i-1+k], dataToElab[i+k], numberOfPoint);
                         dataToElab.splice(i+k, 0, newPoint);
-                    }*/
+                    }
                 }
                 //console.log(google.maps.geometry.spherical.computeDistanceBetween(dataToElab[i-1], dataToElab[i]));
                 //console.log(google.maps.geometry.spherical.computeDistanceBetween(dataToElab[i-1], dataToElab[i], 1000));
-                //console.log(google.maps.geometry.spherical.interpolate(dataToElab[i-1], dataToElab[i], 2));
+                //console.log(google.maps.geometry.spherical.interpolate(dataToElab[i-1], dataToElab[i], 2));*/
             }
-            console.log("Numero di elementi da elaborare: "+dataToElab.length);
+            //log utile:
+            //console.log("Numero di elementi da elaborare: "+dataToElab.length);
             total = 0;
             used = 0;
+            //return; //da togliere
             elaborateRoutes(dataToElab,0);
         }
     });
@@ -310,7 +491,7 @@ function calculateRoute()
 
 function elaborateRoutes(data,n)
 {
-    checkStreetView(data[n], 1, 21, 2, elaborateRoutesOk, elaborateRoutesError, {data: data, n :n});
+    checkStreetView(data[n], 1, 21, 1, elaborateRoutesOk, elaborateRoutesError, {data: data, n :n});
 }
 
 function elaborateRoutesOk(data, callbackData)
@@ -321,7 +502,8 @@ function elaborateRoutesOk(data, callbackData)
 
 function elaborateRoutesError(data, callbackData)
 {
-    console.log("no street view near route: ", data);
+    //log utile
+    //console.log("no street view near route: ", data);
     elaborateRouteNextStep(callbackData.data, callbackData.n);
 }
 
@@ -334,11 +516,18 @@ function elaborateRouteNextStep(data, n)
     }
     else
     {
-        //finishedElaboraRoutes(data,n);
-        unlockMarkers();
+        finishedElaboraRoutes(data,n);
     }
 }
 
+function finishedElaboraRoutes(data,n)
+{
+    routeMarker[0].setMap(null);
+    routeMarker[routeMarker.length-1].setMap(null);
+    unlockMarkers();
+}
+
+/*
 function addUniqueSvMarker(svData)
 {
     alreadyExist = false;
@@ -361,14 +550,22 @@ function addUniqueSvMarker(svData)
             map: map,
             position: svData.location.latLng, //move from direct position to street map position,
             pano: svData.location.pano,
+            lastValidPosition: svData.location.latLng,
             //and usefull to check if exist or not street view image in that way
+            icon: normalMarkerIcon,
             title: "StreetView Point Marker",
             animation: google.maps.Animation.DROP,
         });
         //endPositionMarker.setAnimation(google.maps.Animation.DROP);
         total++;
         used++;
-        console.log(used+"("+total + ") " +  svData.location.latLng + " " + svData.location.pano);
+        dDP = 0;
+        if(routeMarker.length>1)
+        {
+            dDP = google.maps.geometry.spherical.computeDistanceBetween(routeMarker[routeMarker.length-2].position, routeMarker[routeMarker.length-1].position);
+        }
+        //log utile
+        //console.log(used+"("+total + ") " +  svData.location.latLng + " " + svData.location.pano + " distanza dal precedente: " +dDP);
     }
 }
     
