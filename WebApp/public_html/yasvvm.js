@@ -9,6 +9,8 @@ var endPositionMarker;
 var routeMarker = [];
 var total;
 var used;
+// control button
+var homeControlDiv;
 
 //var defaultLocation = new google.maps.LatLng(40.760510, -73.976063);
 var defaultLocation = new google.maps.LatLng(45.563944, 10.231333);
@@ -23,7 +25,7 @@ var disabledMarkerIcon = "http://maps.google.com/mapfiles/kml/paddle/wht-blank.p
     return Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals);
 }*/
 
-function lanLngDistance(latLngStart, latLngEnd)
+/*function lanLngDistance(latLngStart, latLngEnd)
 {
   latDiff = latLngEnd.k - latLngStart.k;
   lngDiff = latLngEnd.B - latLngStart.B;
@@ -36,7 +38,48 @@ function lanLngBetween(latLngStart, latLngEnd, numberOfSlice)
     lngDiff = latLngEnd.B - latLngStart.B;
     newLatLng = new google.maps.LatLng(latLngStart.k+(latDiff/numberOfSlice), latLngStart.B+(lngDiff/numberOfSlice));
     return newLatLng;
+}*/
+
+// Set CSS for the control border
+function showSendAndCloseButton()
+{
+    homeControlDiv = document.createElement('div');
+    homeControlDiv.setAttribute('id','homeControlDiv');
+    homeControlDiv.index = 1;
+    homeControlDiv.style.padding = '10px';
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(homeControlDiv);
+    homeControlUI = document.createElement('div');
+    homeControlUI.style.backgroundColor = 'white';
+    homeControlUI.style.borderStyle = 'solid';
+    homeControlUI.style.borderWidth = '2px';
+    homeControlUI.style.cursor = 'pointer';
+    homeControlUI.style.textAlign = 'center';
+    homeControlUI.title = 'Click to "Genera il percorso"';
+    homeControlDiv.appendChild(homeControlUI);
+
+    homeControlText = document.createElement('div');
+    homeControlText.style.fontFamily = 'Arial,sans-serif';
+    homeControlText.style.fontSize = '30px';
+    homeControlText.style.paddingLeft = '4px';
+    homeControlText.style.paddingRight = '4px';
+    homeControlText.innerHTML = 'Genera il percorso';
+    homeControlUI.appendChild(homeControlText);
+
+  // Setup the click event listeners
+    google.maps.event.addDomListener(homeControlUI, 'click', function()
+    {
+        $("#map-canvas").hide();
+    });
 }
+
+function hideSendAndCloseButton()
+{
+    if(document.getElementById('homeControlDiv'))
+    {
+        map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].pop(homeControlDiv);
+    }
+}
+  
 
 /*point.x = start.x + (final.x - start.x) * progress;
 point.y = start.y + (final.y - start.y) * progress;*/
@@ -244,6 +287,7 @@ function errorStreetViewChecker(data, marker)
 
 function lockMarkers()
 {
+    hideSendAndCloseButton();
     //startPositionMarker
     startPositionMarker.setDraggable(false);
     startPositionMarker.setMap(map);
@@ -262,6 +306,7 @@ function lockMarkers()
 
 function unlockMarkers()
 {
+    showSendAndCloseButton();
     //startPositionMarker
     startPositionMarker.setDraggable(true);
     startPositionMarker.setAnimation(null);
