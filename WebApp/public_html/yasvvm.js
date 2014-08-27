@@ -17,8 +17,15 @@ var defaultLocation = new google.maps.LatLng(45.563944, 10.231333);
 
 var startPositionMarkerIcon = "http://maps.google.com/mapfiles/kml/paddle/go.png";
 var endPositionMarkerIcon = "http://maps.google.com/mapfiles/kml/paddle/stop.png";
-var normalMarkerIcon = "http://maps.google.com/mapfiles/kml/paddle/blu-blank.png";
-var disabledMarkerIcon = "http://maps.google.com/mapfiles/kml/paddle/wht-blank.png";
+var normalMarkerIcon = {
+     url: "http://maps.google.com/mapfiles/kml/paddle/blu-blank.png",
+     scaledSize: new google.maps.Size(32, 32),
+ };
+
+var disabledMarkerIcon = {
+     url: "http://maps.google.com/mapfiles/kml/paddle/wht-blank.png",
+     scaledSize: new google.maps.Size(32, 32),
+ };
 
 /*function roundFun(num, decimals)
 {
@@ -43,43 +50,50 @@ function lanLngBetween(latLngStart, latLngEnd, numberOfSlice)
 // Set CSS for the control border
 function showSendAndCloseButton()
 {
-    homeControlDiv = document.createElement('div');
-    homeControlDiv.setAttribute('id','homeControlDiv');
-    homeControlDiv.index = 1;
-    homeControlDiv.style.padding = '10px';
-    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(homeControlDiv);
-    homeControlUI = document.createElement('div');
-    homeControlUI.style.backgroundColor = 'white';
-    homeControlUI.style.borderStyle = 'solid';
-    homeControlUI.style.borderWidth = '2px';
-    homeControlUI.style.cursor = 'pointer';
-    homeControlUI.style.textAlign = 'center';
-    homeControlUI.title = 'Click to "Genera il percorso"';
-    homeControlDiv.appendChild(homeControlUI);
-
-    homeControlText = document.createElement('div');
-    homeControlText.style.fontFamily = 'Arial,sans-serif';
-    homeControlText.style.fontSize = '30px';
-    homeControlText.style.paddingLeft = '4px';
-    homeControlText.style.paddingRight = '4px';
-    homeControlText.innerHTML = 'Genera il percorso';
-    homeControlUI.appendChild(homeControlText);
-
-  // Setup the click event listeners
-    google.maps.event.addDomListener(homeControlUI, 'click', function()
+    if($("#homeControlDiv").length == 0)
     {
-        $("#map-canvas").hide();
-    });
+        homeControlDiv = document.createElement('div');
+        homeControlDiv.setAttribute('id','homeControlDiv');
+        homeControlDiv.index = 1;
+        homeControlDiv.style.padding = '10px';
+        map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(homeControlDiv);
+        homeControlUI = document.createElement('div');
+        homeControlUI.style.backgroundColor = 'white';
+        homeControlUI.style.borderStyle = 'solid';
+        homeControlUI.style.borderWidth = '2px';
+        homeControlUI.style.cursor = 'pointer';
+        homeControlUI.style.textAlign = 'center';
+        homeControlUI.title = 'Click to \'Close window & start video generation\'';
+        homeControlDiv.appendChild(homeControlUI);
+        
+        homeControlText = document.createElement('div');
+        homeControlText.style.fontFamily = 'Arial,sans-serif';
+        homeControlText.style.fontSize = '30px';
+        homeControlText.style.paddingLeft = '4px';
+        homeControlText.style.paddingRight = '4px';
+        homeControlText.innerHTML = 'Close window & start video generation';
+        homeControlUI.appendChild(homeControlText);
+        
+        // Setup the click event listeners
+        google.maps.event.addDomListener(homeControlUI, 'click', function()
+        {
+            $("#map-canvas").hide();
+        });
+    }
 }
 
 function hideSendAndCloseButton()
 {
-    if(document.getElementById('homeControlDiv'))
+    if($("#homeControlDiv").length != 0)
+    {
+        $("#homeControlDiv").hide();
+    }
+    /*if(document.getElementById('homeControlDiv'))
     {
         map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].pop(homeControlDiv);
-    }
+    }*/
 }
-  
+
 
 /*point.x = start.x + (final.x - start.x) * progress;
 point.y = start.y + (final.y - start.y) * progress;*/
@@ -332,16 +346,32 @@ function unlockMarkers()
             checkStreetView(this.position, 1, 21, 1, streetViewCheckMarkerOk, streetViewCheckMarkerError, this);
             //streetViewChecker(data, routeMarker[i]);
         });
-    
-    // add listner on drop, check if is a street view location
-    //google.maps.event.addListener(startPositionMarker, 'dragend', streetViewCheckerStart);
-    //google.maps.event.addListener(endPositionMarker, 'dragend', streetViewCheckerEnd);
+        
+        google.maps.event.addListener(routeMarker[markerPosition], 'dblclick', function streetViewEraseMarker()
+        {
+            //console.log("prima: "+routeMarker.length);
+            this.setMap(null);
+            //routeMarker.pop(this);
+            for(i=1;i<routeMarker.length-1;i++)
+            {
+                if(routeMarker[i]==this)
+                {
+                    routeMarker.splice(i,1);
+                    return;
+                }
+            }
+            //console.log("dopo: "+routeMarker.length);
+        });
+        
+        // add listner on drop, check if is a street view location
+        //google.maps.event.addListener(startPositionMarker, 'dragend', streetViewCheckerStart);
+        //google.maps.event.addListener(endPositionMarker, 'dragend', streetViewCheckerEnd);
         /*google.maps.event.addListener(endPositionMarker, 'dragstart', function stopBounce()
     {
         endPositionMarker.setAnimation(null);
         //google.maps.event.clearListeners(endPositionMarker, 'dragstart');
     });
-    
+        
     // add listner on drop, check if is a street view location
     google.maps.event.addListener(startPositionMarker, 'dragend', streetViewCheckerStart);
     google.maps.event.addListener(endPositionMarker, 'dragend', streetViewCheckerEnd);*/
@@ -402,8 +432,8 @@ function addUniqueSvMarker(svData)
         //google.maps.event.addListener(routeMarker[routeMarker.length-1], 'dragend', function streetViewCheckerMarker(data)
         //{
         //    console.log(routeMarker.length-1);
-            //checkStreetView(routeMarker[i].latLng, 1, 21, 1, streetViewCheckerMarkerOk, streetViewCheckerMarkerError, routeMarker[i]);
-            //streetViewChecker(data, routeMarker[i]);
+        //checkStreetView(routeMarker[i].latLng, 1, 21, 1, streetViewCheckerMarkerOk, streetViewCheckerMarkerError, routeMarker[i]);
+        //streetViewChecker(data, routeMarker[i]);
         //});
         //endPositionMarker.setAnimation(google.maps.Animation.DROP);
         total++;
@@ -425,6 +455,7 @@ function calculateRoute()
         routeMarker[routeMarker.length-1].setMap(null);
         //routeMarker[routeMarker.length-1] = null;
         routeMarker.splice(routeMarker.length-1,1);
+        //routeMarker.pop(routeMarker[routeMarker.length-1]);
     }
     var request = {
         origin: startPositionMarker.lastValidPosition,
@@ -484,37 +515,37 @@ function calculateRoute()
                         //animation: google.maps.Animation.DROP,
                     });*/
                 }
-                    //alert("distanceBetweenPoints: "+distanceBetweenPoints+"\n"+
-                    //      "numberOfPoint: "+numberOfPoint+"\n"+
-                    //      "fraction: "+fraction+"\n"+
-                    //      "point[i-1]: "+dataToElab[i-1]+"\n"+
-                    //      "point[i]: "+dataToElab[i]+"\n"+
-                    //      "newPoint: "+newPoint+"\n");
-                    //if(newPoint == dataToElab[i-1]) //loop
-                    //{
-                    //    alert("distanceBetweenPoints: "+distanceBetweenPoints+"\n"+
-                    //      "numberOfPoint: "+numberOfPoint+"\n"+
-                    //      "fraction: "+fraction+"\n"+
-                    //      "point[i-1]: "+dataToElab[i-1]+"\n"+
-                    //      "point[i]: "+dataToElab[i]+"\n"+
-                    //      "newPoint: "+newPoint+"\n");
-                        //fraction = roundFun(fraction,2);
-                        //newPoint = google.maps.geometry.spherical.interpolate(dataToElab[i-1], dataToElab[i], fraction);
-                    //}
-                    //else
-                    //{
-                    //    dataToElab.splice(i, 0, newPoint);
-                    //}
-                    //console.log(google.maps.geometry.spherical.computeDistanceBetween(dataToElab[i-1], newPoint));
-                    //console.log(dataToElab[i-1], newPoint, dataToElab[i]);
-                    /*new google.maps.Marker({
+                //alert("distanceBetweenPoints: "+distanceBetweenPoints+"\n"+
+                //      "numberOfPoint: "+numberOfPoint+"\n"+
+                //      "fraction: "+fraction+"\n"+
+                //      "point[i-1]: "+dataToElab[i-1]+"\n"+
+                //      "point[i]: "+dataToElab[i]+"\n"+
+                //      "newPoint: "+newPoint+"\n");
+                //if(newPoint == dataToElab[i-1]) //loop
+                //{
+                //    alert("distanceBetweenPoints: "+distanceBetweenPoints+"\n"+
+                //      "numberOfPoint: "+numberOfPoint+"\n"+
+                //      "fraction: "+fraction+"\n"+
+                //      "point[i-1]: "+dataToElab[i-1]+"\n"+
+                //      "point[i]: "+dataToElab[i]+"\n"+
+                //      "newPoint: "+newPoint+"\n");
+                //fraction = roundFun(fraction,2);
+                //newPoint = google.maps.geometry.spherical.interpolate(dataToElab[i-1], dataToElab[i], fraction);
+                //}
+                //else
+                //{
+                //    dataToElab.splice(i, 0, newPoint);
+                //}
+                //console.log(google.maps.geometry.spherical.computeDistanceBetween(dataToElab[i-1], newPoint));
+                //console.log(dataToElab[i-1], newPoint, dataToElab[i]);
+                /*new google.maps.Marker({
                         map: map,
                         position: newPoint, //move from direct position to street map position,
                         title:"Marker2",
                         animation: google.maps.Animation.BOUNCE,
                     });*/
-                    //console.log(numberOfPoint);
-                    /*for(k=0;k<numberOfPoint;k++)
+                //console.log(numberOfPoint);
+                /*for(k=0;k<numberOfPoint;k++)
                     {
                         newPoint = google.maps.geometry.spherical.interpolate(dataToElab[i-1+k], dataToElab[i+k], numberOfPoint);
                         dataToElab.splice(i+k, 0, newPoint);
@@ -613,7 +644,7 @@ function addUniqueSvMarker(svData)
         //console.log(used+"("+total + ") " +  svData.location.latLng + " " + svData.location.pano + " distanza dal precedente: " +dDP);
     }
 }
-    
+
     /*                //elaborateRoutes(data,i,0);
                 routeMarker[routeMarker.length] = new google.maps.Marker({
                                 map: map,
@@ -639,7 +670,7 @@ function addUniqueSvMarker(svData)
             }
         }
             }*/
-    /*streetViewService.getPanoramaByLocation(data.steps[i].path[j], 1, function processSVData(svData, status)
+/*streetViewService.getPanoramaByLocation(data.steps[i].path[j], 1, function processSVData(svData, status)
     {
         if(status == google.maps.StreetViewStatus.OK)
         {
