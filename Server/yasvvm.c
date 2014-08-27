@@ -26,6 +26,7 @@ using namespace std;
 
 #define WIDTH 640
 #define HEIGHT 640
+#define FRAME_RATE 24
 
 vector <string> read_directory(const string & path);
 
@@ -49,7 +50,7 @@ vector <string> read_directory(const string & path);
 //     return merged;
 // }
 
-    IplImage* createFrame(IplImage* a, IplImage* b){
+IplImage* createFrame(IplImage* a, IplImage* b){
     IplImage* merged = cvCreateImage(cvSize(WIDTH*2, HEIGHT), a->depth, a->nChannels);
 
 
@@ -103,14 +104,16 @@ double distance (String a, String b){
 int do_video(string path){
     vector <string> files = read_directory(path);
     int isColor = 1;
-    int fps     = 1;
+    int fps     = FRAME_RATE;
     int frameW  = WIDTH;
     int frameH  = HEIGHT;
     CvSize size;
     
     size.width = frameW;
     size.height = frameH;
-    CvVideoWriter* writer = cvCreateVideoWriter("out.avi", CV_FOURCC('m','p','4','v'), fps, size, isColor);
+    String filepath (path);
+    filepath += "out.avi";
+    CvVideoWriter* writer = cvCreateVideoWriter(filepath.c_str(), CV_FOURCC('m','p','4','v'), fps, size, isColor);
     IplImage* frame = 0;
     // IplImage* dxh = 0;
     // IplImage* centerh = 0;
@@ -179,13 +182,14 @@ int do_video(string path){
         string filename = files.at(i).c_str();
         string filename_old = (i == 0) ? files.at(i).c_str() : files.at(i-1).c_str();
 
-        string link ("frames/");
+        string link (path);
+        //link += "/";
         link += files.at(i++).c_str();
         printf("apro %s \n", link.c_str());
         f = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
-
-        cout.precision(10);
-        cout << distance(filename, filename_old) << endl;
+        printf("scrivo %s \n", link.c_str());
+        //cout.precision(10);
+        //cout << distance(filename, filename_old) << endl;
 
         //frame = createFrame(sxh,centerh,dxh,sxl,centerl,dxl);
         //frame = createFrame(sx, dx);
@@ -202,6 +206,7 @@ int do_video(string path){
 }
 
 vector <string> read_directory(const string & path = string()){
+    cout << path << endl;
     vector <string> result;
     dirent* de;
     DIR* dp;
@@ -219,9 +224,9 @@ vector <string> read_directory(const string & path = string()){
         closedir( dp );
         sort( result.begin(), result.end() );
     }
-    // for (int i = 0; i < result.size(); ++i){
-    //     printf("%s\n", result.at(i).c_str());        
-    // }
+    for (int i = 0; i < result.size(); ++i){
+        printf("%s\n", result.at(i).c_str());        
+    }
     return result;
 }
 
@@ -258,7 +263,8 @@ static xmlrpc_value * xmlrpc_do_video(xmlrpc_env *   const envP,
                                       void *         const channelInfo){
     char * s;
     xmlrpc_decompose_value(envP, paramArrayP, "(s)", &s);
-    do_video("frames");
+    cout << s << endl;
+    do_video(s);
     xmlrpc_int32 z;
     z=0;
     return xmlrpc_build_value(envP, "i", z);;
@@ -266,7 +272,7 @@ static xmlrpc_value * xmlrpc_do_video(xmlrpc_env *   const envP,
 
 
 int main(int const argc, const char ** const argv) {
-    do_video("frames");
+    //do_video("frames");
     // struct xmlrpc_method_info3 const methodInfo = {"sample.add",  &sample_add};
 
     // struct xmlrpc_method_info3 const methodInforeaddir = {"xmlrpc.read_dir", &xmlrpc_read_dir};
