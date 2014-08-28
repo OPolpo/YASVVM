@@ -10,11 +10,11 @@
         <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEJC-PgZ6svbQX9w6trM8NTZysSFU-inw">
         </script>
-        <script type="text/javascript"
-            src="yasvvm.js">
-        </script>        
         <script 
             src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js">
+        </script>
+        <script type="text/javascript"
+            src="yasvvm.js">
         </script>
         <!--<script type="text/javascript"
             src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.23/angular.min.js">
@@ -26,7 +26,15 @@
             src="js/bootstrap.min.js">
         </script>-->
     </head>
-    <body onload="yassvmInitializer()">
+    <body onload="hideMapsCanvas()">
         <div id="map-canvas"></div>
+        <button onclick="yassvmInitializerShow()">Show Map!!</button>
     </body>
 </html>
+
+
+//idea per come fare il robo
+//trasferisco tutto in un vettore, ogni nuovo ramo diventa un sottovettore,
+//quando il sottovettore è inconcludente, elimino tutto il ramo
+//=>quando un ramo arriva alla fine, mi fermo
+//=>quando un ramo arriva all'inizio, mi fermo

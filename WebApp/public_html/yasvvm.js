@@ -1,19 +1,22 @@
-var map;
-var streetViewService;
-var directionsDisplay;
-var directionsService;
-var startPositionMarker;
-var endPositionMarker;
+var defaultUrl = "http://10.0.0.43:8888/YASVVM2/do_video.php";
+
+var map = null;
+var streetViewService = null;
+var directionsDisplay = null;
+var directionsService = null;
+var startPositionMarker = null;
+var endPositionMarker = null;
 //var lastStartValidPosition;
 //var lastEndValidPosition;
 var routeMarker = [];
-var total;
-var used;
+var total = null;
+var used = null;
 // control button
-var homeControlDiv;
+var homeControlDiv = null;
 
-//var defaultLocation = new google.maps.LatLng(40.760510, -73.976063);
-var defaultLocation = new google.maps.LatLng(45.563944, 10.231333);
+//var defaultLocation = new google.maps.LatLng(40.760510, -73.976063); //nymoma
+var defaultLocation = new google.maps.LatLng(40.735307, -73.989793); //parkavenue
+//var defaultLocation = new google.maps.LatLng(45.563944, 10.231333); //unibs
 
 var startPositionMarkerIcon = "http://maps.google.com/mapfiles/kml/paddle/go.png";
 var endPositionMarkerIcon = "http://maps.google.com/mapfiles/kml/paddle/stop.png";
@@ -26,6 +29,42 @@ var disabledMarkerIcon = {
      url: "http://maps.google.com/mapfiles/kml/paddle/wht-blank.png",
      scaledSize: new google.maps.Size(32, 32),
  };
+
+// give stringfy to json
+$.extend({
+    stringify  : function stringify(obj) {         
+        if ("JSON" in window) {
+            return JSON.stringify(obj);
+        }
+
+        var t = typeof (obj);
+        if (t != "object" || obj === null) {
+            // simple data type
+            if (t == "string") obj = '"' + obj + '"';
+
+            return String(obj);
+        } else {
+            // recurse array or object
+            var n, v, json = [], arr = (obj && obj.constructor == Array);
+
+            for (n in obj) {
+                v = obj[n];
+                t = typeof(v);
+                if (obj.hasOwnProperty(n)) {
+                    if (t == "string") {
+                        v = '"' + v + '"';
+                    } else if (t == "object" && v !== null){
+                        v = jQuery.stringify(v);
+                    }
+
+                    json.push((arr ? "" : '"' + n + '":') + String(v));
+                }
+            }
+
+            return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+        }
+    }
+});
 
 /*function roundFun(num, decimals)
 {
@@ -77,9 +116,18 @@ function showSendAndCloseButton()
         // Setup the click event listeners
         google.maps.event.addDomListener(homeControlUI, 'click', function()
         {
-            $("#map-canvas").hide();
+            hideMapsAndSendVideoRequest();
         });
     }
+    else
+    {
+        $("#homeControlDiv").show();
+    }
+}
+
+function hideMapsCanvas()
+{
+    $("#map-canvas").hide(500, function(){$("#map-canvas").empty();});
 }
 
 function hideSendAndCloseButton()
@@ -94,13 +142,119 @@ function hideSendAndCloseButton()
     }*/
 }
 
+function hideMapsAndSendVideoRequest()
+{
+    jsonMarkerArray = [];
+    for(i=0;i<routeMarker.length;i++)
+    {
+        if(i<=0)
+        {
+            console.log(routeMarker[i].svData);
+            thisDistanceToPrevious = 0;
+        }
+        else
+        {
+            thisDistanceToPrevious = google.maps.geometry.spherical.computeDistanceBetween(routeMarker[i-1].position, routeMarker[i].position);
+        }
+        if(i>=routeMarker.length-1)
+        {
+            thisDistanceToNext = 0;
+            thisHeading = jsonMarkerArray[i-1].h;
+        }
+        else
+        {
+            thisDistanceToNext = google.maps.geometry.spherical.computeDistanceBetween(routeMarker[i].position, routeMarker[i+1].position);
+            thisHeading = google.maps.geometry.spherical.computeHeading(routeMarker[i].position, routeMarker[i+1].position);
+        }
+        jsonMarkerArray[i] = {
+            l: routeMarker[i].position.k,
+            b: routeMarker[i].position.B,
+            h: thisHeading,
+            dtp: thisDistanceToPrevious,
+            dtn: thisDistanceToNext,
+            pano: routeMarker[i].pano
+        };
+    }
+    //test
+    //jsonMarkerArray[jsonMarkerArray.length] = {
+    //        l: 0.0,
+    //        b: 0.0,
+    //        h: 0,
+    //        dtp: 0,
+    //        dtn: 0,
+    //        pano: 0
+    //    };
+    //end test
+    thisData = {id: Math.floor(Math.random()*10000000000), points: jsonMarkerArray};
+    console.log(thisData);
+    $.ajax(
+            {
+                url: defaultUrl,
+                type: "POST",                                                        
+                data: {data: thisData},
+                success: function(output)
+                {
+                    hideMapsCanvas();
+                    console.log(output);
+                    //result = $.parseJSON(output);
+                    /*if(documents.status === "false")
+                    {
+                        alert(documents.error);
+                    }
+                    else
+                    {
+                        documentsList = documents.data.documentList;   
+                        $('#preview').empty();
+                        if ($("#ed").attr("href")!=="css/noedit.css"){
+                            showUpload();
+                        }
+                        for (var k in documentsList)
+                        {
+                            var arr=new Array();
+                            for(var h in documentsList[k].tags){
+                                arr.push(documentsList[k].tags[h].name);
+                            }
+                            if(usr.type==="ADMIN")
+                                title=documentsList[k].title+" - <i>"+documentsList[k].ownerName+"</i>";
+                            else
+                                title=documentsList[k].title;
+                            addPreview(title, documentsList[k].description, documentsList[k].type,arr,documentsList[k].isPrivate,documentsList[k].owned,documentsList[k].id);
+
+                        }
+                        if(documents.data.numberOfDocument==0)
+                            $('#preview').append("<h3>No results found!</h5>");
+                        else
+                            $('#preview').append("<div id='paginator'></div>");
+                        refreshPaginator(documents.data.numberOfDocument,documents.data.documentPerPage,a);
+                    }*/
+                },
+                error: function(output)
+                {
+                    console.log(output);
+                    //result = $.parseJSON(output);
+                    alert("Errore");
+                }
+            });
+
+                
+    /*for(i=0;i<routeMarker.length;i++)
+    {
+        
+    }
+    emptyRouteMarker();*/
+}
 
 /*point.x = start.x + (final.x - start.x) * progress;
 point.y = start.y + (final.y - start.y) * progress;*/
 
+function yassvmInitializerShow()
+{
+    $("#map-canvas").show(500, function(){yassvmInitializer();});
+}
+
 function yassvmInitializer()
 {
-    var mapOptions = {
+    mapOptions = {
         //center: new google.maps.LatLng(45.563944, 10.231333),
         center: defaultLocation,
         //center: new google.maps.LatLng(0, 0),
@@ -116,7 +270,7 @@ function yassvmInitializer()
     };
     map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
     
-    var polylineOptionsValue = new google.maps.Polyline({
+    polylineOptionsValue = new google.maps.Polyline({
         strokeColor: '#00FF00',
         strokeOpacity: 0.5,
         strokeWeight: 7,
@@ -138,7 +292,7 @@ function yassvmInitializer()
     {
         navigator.geolocation.getCurrentPosition(function(position)
         {
-            var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             map.setCenter(pos);
             continueInizialization();
         }, 
@@ -423,6 +577,7 @@ function addUniqueSvMarker(svData)
             position: svData.location.latLng, //move from direct position to street map position,
             pano: svData.location.pano,
             lastValidPosition: svData.location.latLng,
+            svData: svData,
             //and usefull to check if exist or not street view image in that way
             icon: normalMarkerIcon,
             title: "routeMarker "+routeMarker.length,
@@ -438,26 +593,30 @@ function addUniqueSvMarker(svData)
         //endPositionMarker.setAnimation(google.maps.Animation.DROP);
         total++;
         used++;
-        dDP = 0;
-        if(routeMarker.length>1)
-        {
-            dDP = google.maps.geometry.spherical.computeDistanceBetween(routeMarker[routeMarker.length-2].position, routeMarker[routeMarker.length-1].position);
-        }
+        //dDP = 0;
+        //if(routeMarker.length>1)
+        //{
+        //    dDP = google.maps.geometry.spherical.computeDistanceBetween(routeMarker[routeMarker.length-2].position, routeMarker[routeMarker.length-1].position);
+        //}
         // log utile
         //console.log(used+"("+total + ") " +  svData.location.latLng + " " + svData.location.pano + " distanza dal precedente: " +dDP);
     }
 }
 
-function calculateRoute()
+function emptyRouteMarker()
 {
     while(routeMarker.length)
     {
         routeMarker[routeMarker.length-1].setMap(null);
-        //routeMarker[routeMarker.length-1] = null;
         routeMarker.splice(routeMarker.length-1,1);
-        //routeMarker.pop(routeMarker[routeMarker.length-1]);
     }
-    var request = {
+}
+
+function calculateRoute()
+{
+    emptyRouteMarker();
+    
+    request = {
         origin: startPositionMarker.lastValidPosition,
         destination: endPositionMarker.lastValidPosition,
         // Note that Javascript allows us to access the constant
@@ -560,6 +719,7 @@ function calculateRoute()
             total = 0;
             used = 0;
             //return; //da togliere
+            console.log("Number of point to analyze: "+dataToElab.length);
             elaborateRoutes(dataToElab,0);
         }
     });
@@ -600,6 +760,7 @@ function finishedElaboraRoutes(data,n)
 {
     routeMarker[0].setMap(null);
     routeMarker[routeMarker.length-1].setMap(null);
+    console.log("Number of point to download: "+routeMarker.length);
     unlockMarkers();
 }
 
