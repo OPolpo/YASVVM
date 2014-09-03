@@ -1,5 +1,11 @@
 //var defaultUrl = "http://10.0.0.43:8888/YASVVM2/do_video.php";
-var defaultUrl = "http://localhost:80/YASVVM2/do_video.php";
+//var defaultUrl = "http://localhost:80/YASVVM2/do_video.php";
+var baseUrl = "http://localhost/YASVVM/";
+var getIdUrl = baseUrl+"get_all_jobs_id.php";
+var getProgressUrl = baseUrl+"get_progress.php";
+var getNewIdUrl = baseUrl+"get_new_job_id.php";
+var sendJobUrl = baseUrl+"set_job.php";
+var startJobUrl = baseUrl+"start_video_elaboration.php";
 // global variabiles
 var map = null;
 var streetViewService = null;
@@ -10,6 +16,7 @@ var endPositionMarker = null;
 var routeMarker = [];
 var total = null;
 var used = null;
+var thisJobId = null;
 // control button
 var homeControlDiv = null;
 
@@ -101,9 +108,99 @@ function showSendAndCloseButton()
     }
 }
 
+function initializeSystem()
+{
+    hideMapsCanvas();
+    loadJobData();
+}
+
+function loadJobData()
+{
+    $.ajax(
+    {
+        url: getIdUrl,
+        type: "POST",
+        success: function(output)
+        {
+            //console.log(output);
+            result = $.parseJSON(output);
+            $("#scheduler").empty();
+            if(result.status === "false")
+            {
+                alert(result.error);
+            }
+            else
+            {
+                //console.log(result.data.id);
+                if(result.data.id.length<1)
+                {
+                    $("#scheduler").append("<div>No scheduled Job</div>");
+                }
+                else
+                {
+                    for(i=0;i<result.data.id.length;i++)
+                    {
+                        $("#scheduler").append("<div id=\"job"+result.data.id[i]+"\">JobId: "+result.data.id[i]+", 0</div>");
+                        checkJobData(result.data.id[i]);
+                    }
+                }
+            }
+        },
+        error: function(output)
+        {
+            console.log("error:");
+            console.log(output);
+        }
+    });
+}
+
+function checkJobData(id)
+{
+    $.ajax(
+    {
+        url: getProgressUrl,
+        type: "POST",
+        data: {id: id},
+        success: function(output)
+        {
+            //console.log(output);
+            result = $.parseJSON(output);
+            if(result.status === "false")
+            {
+                alert(result.error);
+            }
+            else
+            {
+                //console.log(result.data);
+                if(!result.data.isComplete)
+                {
+                    //console.log("ping: "+id);
+                    $("#job"+id).empty().append("JobId: "+id+", "+result.data.executed+" scaricate su "+result.data.total+"</div>");
+                    setTimeout(function(){checkJobData(id);}, 2000);
+                }
+                else
+                {
+                    $("#job"+id).empty().append("JobId: "+id+", completed [link]</div>");
+                    //togliere set interval!!
+                }
+            }
+        },
+        error: function(output)
+        {
+            console.log("error:");
+            console.log(output);
+        }
+    }); 
+}
+
 function hideMapsCanvas()
 {
-    $("#map-canvas").hide(500);
+    $("#map-canvas").hide();
+}
+
+function hideMapsCanvasAndEmpty()
+{
+    $("#map-canvas").hide(500, function(){$("#map-canvas").empty();});
 }
 
 function hideSendAndCloseButton()
@@ -173,22 +270,41 @@ function hideMapsAndSendVideoRequest()
     //        pano: 0
     //    };
     //end test
-    thisData = {id: Math.floor(Math.random()*10000000000), points: jsonImagePositionArray};
-    console.log(thisData);
+    thisData = {id: thisJobId, points: jsonImagePositionArray};
+    console.log("Number of point to download, after expansion: "+ jsonImagePositionArray.length);
     $.ajax(
             {
-                url: defaultUrl,
+                url: sendJobUrl,
                 type: "POST",                                                        
                 data: {data: thisData},
                 success: function(output)
                 {
-                    hideMapsCanvas();
-                    console.log(output);
+                    $.ajax(
+                    {
+                        url: startJobUrl,
+                        type: "POST",
+                        data: {id: thisJobId},
+                        success: function(output2)
+                        {
+                            console.log("ok:");
+                            console.log(output2);
+                            alert("finito");
+                        },
+                        error: function(output3)
+                        {
+                            console.log("error:");
+                            console.log(output3);
+                            alert("Errore");
+                        }
+                    });
+                    hideMapsCanvasAndEmpty()
+                    loadJobData();
+                    $("#control-canvas").show(500, function(){yassvmInitializer();});
                 },
                 error: function(output)
                 {
+                    console.log("error:");
                     console.log(output);
-                    //result = $.parseJSON(output);
                     alert("Errore");
                 }
             });
@@ -196,7 +312,30 @@ function hideMapsAndSendVideoRequest()
 
 function yassvmInitializerShow()
 {
-    $("#map-canvas").show(500, function(){yassvmInitializer();});
+    $.ajax(
+    {
+        url: getNewIdUrl,
+        type: "POST",
+        success: function(output)
+        {
+            result = $.parseJSON(output);
+            if(result.status === "false")
+            {
+                alert(result.error);
+            }
+            else
+            {
+                thisJobId = result.data;
+                $("#control-canvas").hide();
+                $("#map-canvas").show(500, function(){yassvmInitializer();});
+            }
+        },
+        error: function(output)
+        {
+            console.log("error:");
+            console.log(output);
+        }
+    });
 }
 
 function yassvmInitializer()

@@ -26,15 +26,13 @@
             src="js/bootstrap.min.js">
         </script>-->
     </head>
-    <body onload="hideMapsCanvas()">
+    <body onload="initializeSystem()">
         <div id="map-canvas"></div>
-        <button onclick="yassvmInitializerShow()">Show Map!!</button>
+        <div id="control-canvas">
+            <div id="button-div">
+                <button onclick="yassvmInitializerShow()">Show Map!!</button>
+            </div>
+            <div id="scheduler"></div>
+        </div>
     </body>
 </html>
-
-
-//idea per come fare il robo
-//trasferisco tutto in un vettore, ogni nuovo ramo diventa un sottovettore,
-//quando il sottovettore è inconcludente, elimino tutto il ramo
-//=>quando un ramo arriva alla fine, mi fermo
-//=>quando un ramo arriva all'inizio, mi fermo
