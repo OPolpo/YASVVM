@@ -40,8 +40,8 @@ vector <string> read_directory(const string & path = string()){
     // }
     return result;
 }
-int do_video(string path){
-    vector <string> files = read_directory(path);
+int do_video(string image_path, string destination_path){
+    vector <string> files = read_directory(image_path);
     int isColor = 1;
     int fps     = FRAME_RATE;
     int frameW  = WIDTH;
@@ -50,11 +50,9 @@ int do_video(string path){
     
     size.width = frameW;
     size.height = frameH;
-    String filepathtmp (path);
-    String filepath (path);
-    filepathtmp += "tmp.avi";
-    filepath += "out.avi";
-    CvVideoWriter* writer = cvCreateVideoWriter(filepathtmp.c_str(), CV_FOURCC('m','p','4','v'), fps, size, isColor);
+    String filepathtmp (destination_path);
+    filepathtmp += ".tmp";
+    CvVideoWriter* writer = cvCreateVideoWriter(destination_path.c_str(), CV_FOURCC('m','p','4','v'), fps, size, isColor);
     IplImage* f = 0;
 
     unsigned long i;
@@ -63,25 +61,22 @@ int do_video(string path){
         string filename = files.at(i).c_str();
         string filename_old = (i == 0) ? files.at(i).c_str() : files.at(i-1).c_str();
 
-        string link (path);
+        string link (image_path);
         link += files.at(i++).c_str();
-        printf("apro %s \n", link.c_str());
         f = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
-        printf("scrivo %s \n", link.c_str());
         
         cvWriteFrame(writer, f);
 
     }
     cvReleaseVideoWriter(&writer);
-    rename(filepathtmp.c_str(), filepath.c_str());
+    rename(filepathtmp.c_str(), destination_path.c_str());
     return 0;
 }
 
 int main(int const argc, const char ** const argv){
-    if(argc != 2)
+    if(argc != 3)
         exit(EXIT_FAILURE);
-    do_video(argv[1]);
-    // system("whoami");
+    do_video(argv[1], argv[2]);
     return 0;
 }
 
