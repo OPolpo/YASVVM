@@ -35,9 +35,6 @@ vector <string> read_directory(const string & path = string()){
         closedir( dp );
         sort( result.begin(), result.end() );
     }
-    // for (int i = 0; i < result.size(); ++i){
-    //     printf("%s\n", result.at(i).c_str());        
-    // }
     return result;
 }
 int do_video(string image_path, string destination_path){
@@ -52,21 +49,19 @@ int do_video(string image_path, string destination_path){
     size.height = frameH;
     String filepathtmp (destination_path);
     filepathtmp += ".tmp";
-    CvVideoWriter* writer = cvCreateVideoWriter(destination_path.c_str(), CV_FOURCC('m','p','4','v'), fps, size, isColor);
+    CvVideoWriter* writer = cvCreateVideoWriter(filepathtmp.c_str(), CV_FOURCC('m','p','4','v'), fps, size, isColor);
     IplImage* f = 0;
 
+    string base_link (image_path);
+    string link;
+    string filename;
     unsigned long i;
     for (i = 0; i < files.size();){
-
-        string filename = files.at(i).c_str();
-        string filename_old = (i == 0) ? files.at(i).c_str() : files.at(i-1).c_str();
-
-        string link (image_path);
-        link += files.at(i++).c_str();
-        f = cvLoadImage(link.c_str() ,CV_LOAD_IMAGE_COLOR);
-        
+        filename = files.at(i).c_str();
+        link = base_link + files.at(i++).c_str();
+        f = cvLoadImage(link.c_str(), CV_LOAD_IMAGE_COLOR);
         cvWriteFrame(writer, f);
-
+        cvReleaseImage(&f);
     }
     cvReleaseVideoWriter(&writer);
     rename(filepathtmp.c_str(), destination_path.c_str());
