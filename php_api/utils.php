@@ -10,6 +10,8 @@
     $id_file = '.id';
     $output_dir = 'video_out/';
     $output_file_extension = '.avi';
+    $resource_url = "10.0.0.43:8888/";
+
     
     function check_id($id){
         global $id_file;
@@ -27,6 +29,16 @@
         }
     }
     
+    function get_all_id(){
+        global $id_file;
+        if(file_exists($id_file)){
+            return split("\n", substr(file_get_contents($id_file), 0, -1));
+        }
+        else{
+            return false;
+        }
+    }
+
     function remove_id($id){
         global $id_file;
         if(file_exists($id_file)){

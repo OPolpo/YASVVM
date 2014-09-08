@@ -21,6 +21,6 @@
         }
     }
     
-    $complete = file_exists($dir.'out.avi') ? "true" : "false";
+    $complete = file_exists($output_dir.$id.$output_file_extension) ? "true" : "false";
     echo json_ok(array("executed" => $i,"total" => $total, "isComplete" => $complete));
 ?>
