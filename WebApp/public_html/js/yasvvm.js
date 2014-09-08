@@ -1,7 +1,7 @@
 //var defaultUrl = "http://10.0.0.43:8888/YASVVM2/do_video.php";
 //var defaultUrl = "http://localhost:80/YASVVM2/do_video.php";
 //var baseUrl = "http://localhost/YASVVM/";
-var baseUrl = "http://10.0.0.43:8888/YASVVM/";
+var baseUrl = "http://localhost:8888/YASVVM/";
 var getIdUrl = baseUrl+"get_all_jobs_id.php";
 var getProgressUrl = baseUrl+"get_progress.php";
 var getNewIdUrl = baseUrl+"get_new_job_id.php";
@@ -221,6 +221,18 @@ function hideSendAndCloseButton()
     }
 }
 
+function to360(_180angle){
+    if(_180angle < 0)
+        return _180angle + 360.0;
+    return _180angle;
+}
+
+function to180(_360angle){
+    if(_360angle > 180)
+        return _360angle - 360.0;
+    return _360angle;
+}
+
 function hideMapsAndSendVideoRequest()
 {
     jsonImagePositionArray = [];
@@ -254,19 +266,24 @@ function hideMapsAndSendVideoRequest()
         };
     }
     //add some new Marker
-    maxAngleBetweenPoints = 20;
+    maxAngleBetweenPoints = 10.0;
     for(i=1;i<jsonImagePositionArray.length;i++)
     {
         //trasform angle from [-180,180] to [0,360]
-        startAngle = jsonImagePositionArray[i-1].h+180;
-        endAngle = jsonImagePositionArray[i].h+180;
+        console.log(jsonImagePositionArray[i].h);
+        startAngle = to360(jsonImagePositionArray[i-1].h);
+        endAngle = to360(jsonImagePositionArray[i].h);
         angleBetweenPoints = endAngle - startAngle;
+        angleBetweenPoints = angleBetweenPoints < -180.0 ? +360.0 + angleBetweenPoints : angleBetweenPoints;
+        angleBetweenPoints = angleBetweenPoints > 180.0 ? -360.0 + angleBetweenPoints : angleBetweenPoints;
+        console.log("agle bet "+angleBetweenPoints);
         if(Math.abs(angleBetweenPoints) > maxAngleBetweenPoints)
-        {
+        {  
             numberOfPoint = Math.ceil(Math.abs(angleBetweenPoints)/maxAngleBetweenPoints);
-            newPoint = jsonImagePositionArray[i];
-            newPoint.h = (startAngle + (angleBetweenPoints/numberOfPoint))-180; //go back to [-180,180] scale
-            //console.log(newPoint);
+            newPoint = JSON.parse( JSON.stringify(jsonImagePositionArray[i]));//simplest way to clone
+            console.log("increment " + angleBetweenPoints/numberOfPoint);
+            newPoint.h = to180((startAngle + (angleBetweenPoints/numberOfPoint))); //go back to [-180,180] scale
+            console.log("gg ",newPoint.h);
             jsonImagePositionArray.splice(i, 0, newPoint);
         }
     }   
