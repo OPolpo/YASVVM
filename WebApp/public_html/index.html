@@ -1,38 +1,94 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-        <style type="text/css">
-            html { height: 99%; }
-            body { height: 99%; margin: auto; padding: 0; border:red solid thick }
-            #map-canvas { height: 100%; width: 70%; margin: 0 auto}
-        </style>
-        <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEJC-PgZ6svbQX9w6trM8NTZysSFU-inw">
-        </script>
-        <script 
-            src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js">
-        </script>
-        <script type="text/javascript"
-            src="yasvvm.js">
-        </script>
-        <!--<script type="text/javascript"
-            src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.23/angular.min.js">
-        </script>        
-        <script type="text/css"
-            src="css/bootstrap.min.css">
-        </script>
-        <script type="text/javascript"
-            src="js/bootstrap.min.js">
-        </script>-->
-    </head>
-    <body onload="initializeSystem()">
-        <div id="map-canvas"></div>
-        <div id="control-canvas">
-            <div id="button-div">
-                <button onclick="yassvmInitializerShow()">Show Map!!</button>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="img/favicon.png">
+
+    <title>YASVVM - Yet Another Street View Video Maker</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/cover.css" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <div class="site-wrapper">
+
+      <div class="site-wrapper-inner">
+
+        <div class="cover-container">
+          <div class="masthead clearfix">
+            <div class="inner">
+                <h3 class="masthead-brand">
+                    <a href="index.html"><img src="img/logo.png" height="40" alt="YASVVM" /></a>
+                </h3>
+              <ul id="tabControl" class="nav masthead-nav">
+                <li class="active"><a href="#home">Home</a></li>
+                <li><a href="#works">Works</a></li>
+                <li><a href="#new">New</a></li>
+                <li><a href="#credits">Credits</a></li>
+              </ul>
             </div>
-            <div id="scheduler"></div>
-        </div>
-    </body>
+          </div>
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div class="tab-pane active" id="home">
+                    <div class="inner cover">
+                        <h1 class="cover-heading">Welcome!</h1>
+                        <p class="lead">Yet Another Street View Video Maker is our final assignment in Digital Image Processing 2014 course @ <a href="http://www.unibs.it">UNIBS</a></p>
+                        <p class="lead"><a href="#works">Watch scheduled works</a> or <a href="#new">Create a new video</a></p>
+                        <p class="lead"><a href="http://twitter.com/O_Polpo">Andrea Bocchese</a>, <a href="http://twitter.com/mellowonpsx">Sergio Leoni</a></p>
+                        <p>Thanks to: <a href="#credits">Credits</a></p>
+                    </div>
+                    <div class="mastfoot">
+                        <div class="inner">
+                            <p> <a href="http://githubluink">YASVVM</a> - Yet Another Street View Video Maker </p>
+                            <p><a href="https://github.com/OPolpo">@OPolpo</a> &AMP; <a href="https://github.com/mellowonpsx">@mellowonpsx</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="works">
+                    <div class="inner cover">
+                        <h1 class="cover-heading">ROBA A CASO!!!!</h1>
+                    </div>
+                </div>
+                <div class="tab-pane" id="new">
+                    <div class="inner cover">
+                        <h1 class="cover-heading">ROBA A CASO!!!!</h1>
+                    </div>
+                </div>
+                <div class="tab-pane" id="credits">
+                    <div class="inner cover">
+                        <h1 class="cover-heading">CREDITS!</h1>
+                        <p class="lead">Yet Another Street View Video Maker is our final assignment in Digital Image Processing 2014 course @ <a href="http://www.unibs.it">UNIBS</a></p>
+                        <p class="lead"><a href="#works">Watch scheduled works</a> or <a href="#new">Create a new video</a></p>
+                        <p class="lead"><a href="http://twitter.com/O_Polpo">Andrea Bocchese</a>, <a href="http://twitter.com/mellowonpsx">Sergio Leoni</a></p>
+                        <p>Thanks to: <a href="#credits">Credits</a></p>
+                    </div>
+                    <div class="mastfoot" fade in>
+                        <div class="inner">
+                            <p> <a href="http://githubluink">YASVVM</a> - Yet Another Street View Video Maker </p>
+                            <p><a href="https://github.com/OPolpo">@OPolpo</a> &AMP; <a href="https://github.com/mellowonpsx">@mellowonpsx</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="js/tabcontrol.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+  </body>
 </html>
