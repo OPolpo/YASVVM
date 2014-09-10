@@ -270,20 +270,20 @@ function hideMapsAndSendVideoRequest()
     for(i=1;i<jsonImagePositionArray.length;i++)
     {
         //trasform angle from [-180,180] to [0,360]
-        console.log(jsonImagePositionArray[i].h);
+        //console.log(jsonImagePositionArray[i].h);
         startAngle = to360(jsonImagePositionArray[i-1].h);
         endAngle = to360(jsonImagePositionArray[i].h);
         angleBetweenPoints = endAngle - startAngle;
         angleBetweenPoints = angleBetweenPoints < -180.0 ? +360.0 + angleBetweenPoints : angleBetweenPoints;
         angleBetweenPoints = angleBetweenPoints > 180.0 ? -360.0 + angleBetweenPoints : angleBetweenPoints;
-        console.log("agle bet "+angleBetweenPoints);
+        //console.log("agle bet "+angleBetweenPoints);
         if(Math.abs(angleBetweenPoints) > maxAngleBetweenPoints)
         {  
             numberOfPoint = Math.ceil(Math.abs(angleBetweenPoints)/maxAngleBetweenPoints);
             newPoint = JSON.parse( JSON.stringify(jsonImagePositionArray[i]));//simplest way to clone
             console.log("increment " + angleBetweenPoints/numberOfPoint);
             newPoint.h = to180((startAngle + (angleBetweenPoints/numberOfPoint))); //go back to [-180,180] scale
-            if(angleBetweenPoints > 0){
+            if(angleBetweenPoints > 0.0){
                 newPoint.t = 'r';
             }
             else{
