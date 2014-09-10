@@ -283,6 +283,12 @@ function hideMapsAndSendVideoRequest()
             newPoint = JSON.parse( JSON.stringify(jsonImagePositionArray[i]));//simplest way to clone
             console.log("increment " + angleBetweenPoints/numberOfPoint);
             newPoint.h = to180((startAngle + (angleBetweenPoints/numberOfPoint))); //go back to [-180,180] scale
+            if(angleBetweenPoints > 0){
+                newPoint.t = 'r';
+            }
+            else{
+                newPoint.t = 'l';
+            }
             console.log("gg ",newPoint.h);
             jsonImagePositionArray.splice(i, 0, newPoint);
         }
