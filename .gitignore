@@ -1,4 +1,5 @@
 /WebApp/nbproject/private/
+<<<<<<< HEAD
 Server/yasvvm.dSYM/Contents/Resources/DWARF/yasvvm
 
 Server/yasvvm
@@ -8,3 +9,9 @@ Server/yasvvm
 Server/out.avi
 
 *.avi
+=======
+
+*.plist
+
+Server/*
+>>>>>>> WebApp
