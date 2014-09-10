@@ -1,94 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="img/favicon.png">
-
-    <title>YASVVM - Yet Another Street View Video Maker</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom styles for this template -->
-    <link href="css/cover.css" rel="stylesheet">
-
-  </head>
-
-  <body>
-
-    <div class="site-wrapper">
-
-      <div class="site-wrapper-inner">
-
-        <div class="cover-container">
-          <div class="masthead clearfix">
-            <div class="inner">
-                <h3 class="masthead-brand">
-                    <a href="index.html"><img src="img/logo.png" height="40" alt="YASVVM" /></a>
-                </h3>
-              <ul id="tabControl" class="nav masthead-nav">
-                <li class="active"><a href="#home">Home</a></li>
-                <li><a href="#works">Works</a></li>
-                <li><a href="#new">New</a></li>
-                <li><a href="#credits">Credits</a></li>
-              </ul>
-            </div>
-          </div>
-            <!-- Tab panes -->
-            <div class="tab-content">
-                <div class="tab-pane fade in active" id="home">
-                    <div class="inner cover">
-                        <h1 class="cover-heading">Welcome!</h1>
-                        <p class="lead">Yet Another Street View Video Maker is our final assignment in Digital Image Processing 2014 course @ <a href="http://www.unibs.it">UNIBS</a></p>
-                        <p class="lead"><a href="#works">Watch scheduled works</a> or <a href="#new">Create a new video</a></p>
-                        <p class="lead"><a href="http://twitter.com/O_Polpo">Andrea Bocchese</a>, <a href="http://twitter.com/mellowonpsx">Sergio Leoni</a></p>
-                        <p>Thanks to: <a href="#credits">Credits</a></p>
-                    </div>
-                    <div class="mastfoot">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <link rel="icon" href="img/favicon.png">
+        <title>YASVVM - Yet Another Street View Video Maker</title>
+        <!-- Bootstrap core CSS -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <!-- Custom styles for this template -->
+        <link href="css/cover.css" rel="stylesheet">
+        <!-- Custom scroll bar -->
+        <link rel="stylesheet" href="http://malihu.github.io/custom-scrollbar/jquery.mCustomScrollbar.min.css" />
+    </head>
+    <body>
+        <div class="site-wrapper">
+            <div class="site-wrapper-inner">
+                <div class="cover-container">
+                    <div class="masthead">
                         <div class="inner">
-                            <p> <a href="http://githubluink">YASVVM</a> - Yet Another Street View Video Maker </p>
-                            <p><a href="https://github.com/OPolpo">@OPolpo</a> &AMP; <a href="https://github.com/mellowonpsx">@mellowonpsx</a></p>
+                            <h3 class="masthead-brand">
+                                <a href="index.html"><img src="img/logo.png" height="40" alt="YASVVM" /></a>
+                            </h3>
+                            <ul id="tabControl" class="nav masthead-nav">
+                                <li class="active"><a href="#home">Home</a></li>
+                                <li><a href="#works">Works</a></li>
+                                <li><a href="#new">New</a></li>
+                                <li><a href="#credits">Credits</a></li>
+                            </ul>
                         </div>
                     </div>
-                </div>
-                <div class="tab-pane fade" id="works">
-                    <div class="inner cover">
-                        <h1 class="cover-heading">ROBA A CASO!!!!</h1>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="new">
-                    <div class="inner cover">
-                        <h1 class="cover-heading">ROBA A CASO!!!!</h1>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="credits">
-                    <div class="inner cover">
-                        <h1 class="cover-heading">CREDITS!</h1>
-                        <p class="lead">Yet Another Street View Video Maker is our final assignment in Digital Image Processing 2014 course @ <a href="http://www.unibs.it">UNIBS</a></p>
-                        <p class="lead"><a href="#works">Watch scheduled works</a> or <a href="#new">Create a new video</a></p>
-                        <p class="lead"><a href="http://twitter.com/O_Polpo">Andrea Bocchese</a>, <a href="http://twitter.com/mellowonpsx">Sergio Leoni</a></p>
-                        <p>Thanks to: <a href="#credits">Credits</a></p>
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="home">
+                            <div class="inner cover">
+                                <h1 class="cover-heading">Welcome!</h1>
+                                <p class="lead">Yet Another Street View Video Maker is our final assignment in Digital Image Processing 2014 course @ <a href="http://www.unibs.it">UNIBS</a></p>
+                                <p class="lead"><a class="links" href="#" onclick="clicked('works');">Watch scheduled works</a> or <a href="#" onclick="clicked('new');">Create a new video</a></p>
+                                <p class="lead"><a href="http://twitter.com/O_Polpo">Andrea Bocchese</a>, <a href="http://twitter.com/mellowonpsx">Sergio Leoni</a></p>
+                                <p>Thanks to: <a href="#" onclick="clicked('credits');">Credits</a></p>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="works">
+                            <div class="inner cover">
+                                <div id="scheduler-canvas" class="mCustomScrollbar">
+                                    <h1 class="cover-heading">Scheduled Works</h1>
+                                    <div id="scheduler"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="new">
+                            <div class="inner cover">
+                                <div id="map-canvas"></div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="credits">
+                            <div class="inner cover">
+                                <h1 class="cover-heading">Credits</h1>
+                                <p class="lead">As any project we take inspiration from several project, persons, resources</p>
+                                <p></p>
+                            </div>
+                        </div>
                     </div>
                     <div class="mastfoot">
-                        <div class="inner">
-                            <p> <a href="http://githubluink">YASVVM</a> - Yet Another Street View Video Maker </p>
+                            <p><a href="http://githubluink">YASVVM</a> - Yet Another Street View Video Maker </p>
                             <p><a href="https://github.com/OPolpo">@OPolpo</a> &AMP; <a href="https://github.com/mellowonpsx">@mellowonpsx</a></p>
                         </div>
                     </div>
                 </div>
             </div>
-      </div>
-    </div>
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="js/tabcontrol.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-  </body>
+        </div>
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEJC-PgZ6svbQX9w6trM8NTZysSFU-inw"></script>
+        <script src="js/tabcontrol.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/yasvvm.js"></script>
+        <script src="http://malihu.github.io/custom-scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+    </body>
 </html>

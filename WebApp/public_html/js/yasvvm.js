@@ -1,9 +1,10 @@
 //var defaultUrl = "http://10.0.0.43:8888/YASVVM2/do_video.php";
 //var defaultUrl = "http://localhost:80/YASVVM2/do_video.php";
-//var baseUrl = "http://localhost/YASVVM/";
-var baseUrl = "http://10.0.0.43:8888/YASVVM/";
+var baseUrl = "http://localhost/YASVVM/";
+//var baseUrl = "http://10.0.71.116:8888/YASVVM/";
 var getIdUrl = baseUrl+"get_all_jobs_id.php";
 var getProgressUrl = baseUrl+"get_progress.php";
+var getDownloadUrl = baseUrl+"get_video_link.php";
 var getNewIdUrl = baseUrl+"get_new_job_id.php";
 var sendJobUrl = baseUrl+"set_job.php";
 var startJobUrl = baseUrl+"start_video_elaboration.php";
@@ -20,7 +21,6 @@ var used = null;
 var thisJobId = null;
 // control button
 var homeControlDiv = null;
-
 // defaut location, in case of localization not present
 var defaultLocation = new google.maps.LatLng(40.767383, -73.981711); //brodway
 
@@ -80,12 +80,11 @@ function showSendAndCloseButton()
         homeControlDiv = document.createElement('div');
         homeControlDiv.setAttribute('id','homeControlDiv');
         homeControlDiv.index = 1;
-        homeControlDiv.style.padding = '10px';
         map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(homeControlDiv);
         homeControlUI = document.createElement('div');
-        homeControlUI.style.backgroundColor = 'white';
-        homeControlUI.style.borderStyle = 'solid';
-        homeControlUI.style.borderWidth = '2px';
+        //homeControlUI.style.backgroundColor = 'white';
+        //homeControlUI.style.borderStyle = 'solid';
+        //homeControlUI.style.borderWidth = '2px';
         homeControlUI.style.cursor = 'pointer';
         homeControlUI.style.textAlign = 'center';
         homeControlUI.title = 'Click to \'Close window & start video generation\'';
@@ -95,12 +94,17 @@ function showSendAndCloseButton()
         homeControlText.style.fontSize = '30px';
         homeControlText.style.paddingLeft = '4px';
         homeControlText.style.paddingRight = '4px';
+        homeControlText.className = "cover-container";
+        homeControlText.style.width = "auto";
+        //homeControlDiv.style.padding = 'px';
+        //homeControlText.style.margin = '0';
+        //homeControlDiv.style.padding = '0';
         homeControlText.innerHTML = 'Close window & start video generation';
         homeControlUI.appendChild(homeControlText);
         // Setup the click event listeners
         google.maps.event.addDomListener(homeControlUI, 'click', function()
         {
-            hideMapsAndSendVideoRequest();
+            sendVideoRequest();
         });
     }
     else
@@ -109,12 +113,13 @@ function showSendAndCloseButton()
     }
 }
 
-function initializeSystem()
+/*function initializeSystem()
 {
     hideMapsCanvas();
     loadJobData();
-}
+}*/
 
+/*
 function loadJobData()
 {
     $.ajax(
@@ -201,17 +206,17 @@ function checkJobData(id)
             console.log(output);
         }
     }); 
-}
+}*/
 
-function hideMapsCanvas()
+/*function hideMapsCanvas()
 {
     $("#map-canvas").hide();
-}
+}*/
 
-function hideMapsCanvasAndEmpty()
+/*function hideMapsCanvasAndEmpty()
 {
     $("#map-canvas").hide(500, function(){$("#map-canvas").empty();});
-}
+}*/
 
 function hideSendAndCloseButton()
 {
@@ -221,7 +226,7 @@ function hideSendAndCloseButton()
     }
 }
 
-function hideMapsAndSendVideoRequest()
+function sendVideoRequest()
 {
     jsonImagePositionArray = [];
     for(i=0;i<routeMarker.length;i++)
@@ -307,9 +312,11 @@ function hideMapsAndSendVideoRequest()
                             alert("Errore sul job: "+thisJobId);
                         }
                     });
-                    hideMapsCanvasAndEmpty()
+                    //$('a[href="#works"]').trigger('click');
+                    clicked(works);
+                    /*hideMapsCanvasAndEmpty()
                     loadJobData();
-                    $("#control-canvas").show(500, function(){yassvmInitializer();});
+                    $("#control-canvas").show(500, function(){yassvmInitializer();});*/
                 },
                 error: function(output)
                 {
@@ -328,6 +335,7 @@ function yassvmInitializerShow()
         type: "POST",
         success: function(output)
         {
+            //console.log(output);
             result = $.parseJSON(output);
             if(result.status === "false")
             {
@@ -336,7 +344,6 @@ function yassvmInitializerShow()
             else
             {
                 thisJobId = result.data;
-                $("#control-canvas").hide();
                 $("#map-canvas").show(500, function(){yassvmInitializer();});
             }
         },
