@@ -20,6 +20,7 @@ var routeMarker = [];
 var total = null;
 var used = null;
 var thisJobId = null;
+var stopPreviousWork = true;
 // control button
 var homeControlDiv = null;
 // defaut location, in case of localization not present
@@ -337,7 +338,7 @@ function sendVideoRequest()
                         }
                     });
                     //$('a[href="#works"]').trigger('click');
-                    clicked(works);
+                    clicked('works');
                     /*hideMapsCanvasAndEmpty()
                     loadJobData();
                     $("#control-canvas").show(500, function(){yassvmInitializer();});*/
@@ -368,7 +369,10 @@ function yassvmInitializerShow()
             else
             {
                 thisJobId = result.data;
-                $("#map-canvas").show(500, function(){yassvmInitializer();});
+                //$("#map-canvas").show(500, function(){yassvmInitializer();});
+                //$("#map-canvas").show(function(){yassvmInitializer();});
+                stopPreviousWork = true;
+                yassvmInitializer();
             }
         },
         error: function(output)
@@ -699,6 +703,7 @@ function calculateRoute()
 
 function elaborateRoutes(data,n)
 {
+    stopPreviousWork = false;
     checkStreetView(data[n], 1, 21, 1, elaborateRoutesOk, elaborateRoutesError, {data: data, n :n});
 }
 
@@ -715,6 +720,7 @@ function elaborateRoutesError(data, callbackData)
 
 function elaborateRouteNextStep(data, n)
 {
+    if(stopPreviousWork) return;
     n++;
     if(n<data.length)
     {

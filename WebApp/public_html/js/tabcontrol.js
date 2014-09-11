@@ -1,5 +1,6 @@
 $('#tabControl a').click(function (e) {
   e.preventDefault();
+  stopPreviousWork = false;
   $(this).tab('show');
 });
 
