@@ -1,8 +1,8 @@
 //var defaultUrl = "http://10.0.0.43:8888/YASVVM2/do_video.php";
 //var defaultUrl = "http://localhost:80/YASVVM2/do_video.php";
-var baseUrl = "http://localhost/YASVVM/"; //mellowonpsx
-//var baseUrl = "http://localhost:8888/YASVVM/"; //Opolpo
-//var baseUrl = "http://10.0.71.116:8888/YASVVM/";
+//var baseUrl = "http://localhost/YASVVM/"; //mellowonpsx
+var baseUrl = "http://10.0.0.43:8888/YASVVM/"; //Opolpo
+//var baseUrl = "http://10.0.71.113/YASVVM/";
 var getIdUrl = baseUrl+"get_all_jobs_id.php";
 var getProgressUrl = baseUrl+"get_progress.php";
 var getDownloadUrl = baseUrl+"get_video_link.php";

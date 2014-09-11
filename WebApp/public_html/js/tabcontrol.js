@@ -131,7 +131,9 @@ function checkJobData(id)
                                 result = $.parseJSON(output);
                                 if(result.status === "false")
                                 {
-                                    alert(result.error);
+                                    $("#job"+id+" .progress-bar").addClass("progress-bar-error");
+                                    console.log(result.error);
+                                    $("#job"+id+" a").prop("href", "#");
                                 }
                                 else
                                 {
