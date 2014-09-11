@@ -30,9 +30,9 @@ int detect_turn(string filename){
 
 void impress_turn_sign(IplImage * image, int turn){
     if(turn == 1)
-        cvAddWeighted(image, 1, turn_right_image, 0.1, 0.0, image);
+        cvAddWeighted(image, 1, turn_right_image, 0.5, 0.0, image);
     if(turn == -1)
-        cvAddWeighted(image, 1, turn_left_image, 0.1, 0.0, image);
+        cvAddWeighted(image, 1, turn_left_image, 0.5, 0.0, image);
 }
 
 vector <string> read_directory(const string & path = string()){

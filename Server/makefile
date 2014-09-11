@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -g -Wall -Wextra
 LIBS = -lopencv_core -lopencv_imgproc -lopencv_highgui
 
-SRC = yasvvm.c
+SRC = yasvvm.cpp
 BIN = yasvvm
 
 all: $(BIN)
