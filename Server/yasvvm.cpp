@@ -14,7 +14,7 @@ using namespace std;
 
 #define WIDTH 640
 #define HEIGHT 640
-#define FRAME_RATE 24
+//#define FRAME_RATE 24
 
 IplImage * turn_right_image = cvLoadImage("right.jpg", CV_LOAD_IMAGE_COLOR);
 IplImage * turn_left_image = cvLoadImage("left.jpg", CV_LOAD_IMAGE_COLOR);
@@ -56,11 +56,11 @@ vector <string> read_directory(const string & path = string()){
     }
     return result;
 }
-int do_video(string image_path, string destination_path){
+int do_video(string image_path, string destination_path, int frame_rate){
     vector <string> files = read_directory(image_path);
 
     int isColor = 1;
-    int fps     = FRAME_RATE;
+    int fps     = frame_rate;
     int frameW  = WIDTH;
     int frameH  = HEIGHT;
     CvSize size;
@@ -97,9 +97,10 @@ int do_video(string image_path, string destination_path){
 }
 
 int main(int const argc, const char ** const argv){
-    if(argc != 3)
+    if(argc != 4)
         exit(EXIT_FAILURE);
-    do_video(argv[1], argv[2]);
+		cout << atoi(argv[3]) << endl;
+    do_video(argv[1], argv[2], atoi(argv[3]));
     cvReleaseImage(&turn_right_image);
     cvReleaseImage(&turn_left_image);
     return 0;

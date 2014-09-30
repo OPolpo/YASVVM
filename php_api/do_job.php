@@ -33,5 +33,5 @@
     if(!is_dir($output_dir)){
         mkdir($output_dir);
     }
-    exec($yasvvm." ".$dir." ".$output_dir.$job['id'].$output_file_extension);
+    exec($yasvvm." ".$dir." ".$output_dir.$job['id'].$output_file_extension." "."24");
 ?>
