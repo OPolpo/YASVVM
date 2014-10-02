@@ -56,6 +56,25 @@ vector <string> read_directory(const string & path = string()){
     }
     return result;
 }
+
+void add_frames(IplImage* a, IplImage* b, CvVideoWriter* writer, int sub_frame_number){
+    IplImage* interpoled = cvCreateImage(cvGetSize(b), b->depth, b->nChannels);
+    cvAddWeighted(a, 0.5, b, 0.5, 0.0, interpoled);
+    cvWriteFrame(writer, a);
+    //cvWriteFrame(writer, interpoled);
+    //cvWriteFrame(writer, b);
+    int i;
+    for(i = 1; i < sub_frame_number+1; i++){
+        IplImage* interpoled = cvCreateImage(cvGetSize(b), b->depth, b->nChannels);
+        cout << i/(sub_frame_number+1.0) << endl;
+        cout << 1-i/(sub_frame_number+1.0) << endl;
+        cvAddWeighted(a, 1 - i/(sub_frame_number+1.0), b, i/(sub_frame_number+1.0), 0.0, interpoled);
+        cvWriteFrame(writer, interpoled);
+    }
+    cvWriteFrame(writer, b);
+}
+
+
 int do_video(string image_path, string destination_path, int frame_rate){
     vector <string> files = read_directory(image_path);
 
@@ -71,6 +90,7 @@ int do_video(string image_path, string destination_path, int frame_rate){
     filepathtmp += ".tmp";
     CvVideoWriter* writer = cvCreateVideoWriter(filepathtmp.c_str(), CV_FOURCC('m','p','4','v'), fps, size, isColor);
     IplImage* f = 0;
+    IplImage* f_old = 0;
 
     string base_link (image_path);
     string link;
@@ -88,8 +108,12 @@ int do_video(string image_path, string destination_path, int frame_rate){
         if(turn)
             impress_turn_sign(f, turn);
 
-        cvWriteFrame(writer, f);
-        cvReleaseImage(&f);
+        if(f_old != 0 && f !=0){
+            add_frames(f_old, f, writer, 12/frame_rate);
+        }
+
+        cvReleaseImage(&f_old);
+        f_old = f;
     }
     cvReleaseVideoWriter(&writer);
     rename(filepathtmp.c_str(), destination_path.c_str());
