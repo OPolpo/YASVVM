@@ -75,11 +75,11 @@ void add_frames(IplImage* a, IplImage* b, CvVideoWriter* writer, int sub_frame_n
 }
 
 
-int do_video(string image_path, string destination_path, int frame_rate){
+int do_video(string image_path, string destination_path, int intermediate_frame){
     vector <string> files = read_directory(image_path);
 
     int isColor = 1;
-    int fps     = frame_rate;
+    int fps     = 24;
     int frameW  = WIDTH;
     int frameH  = HEIGHT;
     CvSize size;
@@ -109,7 +109,7 @@ int do_video(string image_path, string destination_path, int frame_rate){
             impress_turn_sign(f, turn);
 
         if(f_old != 0 && f !=0){
-            add_frames(f_old, f, writer, 12/frame_rate);
+            add_frames(f_old, f, writer, intermediate_frame);
         }
 
         cvReleaseImage(&f_old);
