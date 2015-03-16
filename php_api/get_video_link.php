@@ -9,5 +9,5 @@
         json_ok($link);
     }
     else
-        json_ok("Link doesn't exists");
+        json_error("Link doesn't exists");
 ?>

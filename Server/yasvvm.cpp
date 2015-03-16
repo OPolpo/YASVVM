@@ -58,8 +58,8 @@ vector <string> read_directory(const string & path = string()){
 }
 
 void add_frames(IplImage* a, IplImage* b, CvVideoWriter* writer, int sub_frame_number){
-    IplImage* interpoled = cvCreateImage(cvGetSize(b), b->depth, b->nChannels);
-    cvAddWeighted(a, 0.5, b, 0.5, 0.0, interpoled);
+    //IplImage* interpoled = cvCreateImage(cvGetSize(b), b->depth, b->nChannels);
+    //cvAddWeighted(a, 0.5, b, 0.5, 0.0, interpoled);
     cvWriteFrame(writer, a);
     //cvWriteFrame(writer, interpoled);
     //cvWriteFrame(writer, b);
