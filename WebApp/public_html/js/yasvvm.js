@@ -1,8 +1,8 @@
 //var defaultUrl = "http://10.0.0.43:8888/YASVVM2/do_video.php";
 //var defaultUrl = "http://localhost:80/YASVVM2/do_video.php";
 //var baseUrl = "http://localhost/YASVVM/"; //mellowonpsx
-var baseUrl = "http://10.0.0.43:8888/YASVVM/"; //Opolpo
-//var baseUrl = "http://10.0.71.113/YASVVM/";
+//var baseUrl = "http://10.0.0.43:8888/YASVVM/"; //Opolpo
+var baseUrl = "http://10.10.1.111:8888//YASVVM/"; //prove aula tutor
 var getIdUrl = baseUrl+"get_all_jobs_id.php";
 var getProgressUrl = baseUrl+"get_progress.php";
 var getDownloadUrl = baseUrl+"get_video_link.php";
@@ -263,9 +263,11 @@ function sendVideoRequest()
             thisDistanceToNext = google.maps.geometry.spherical.computeDistanceBetween(routeMarker[i].position, routeMarker[i+1].position);
             thisHeading = google.maps.geometry.spherical.computeHeading(routeMarker[i].position, routeMarker[i+1].position);
         }
+        console.log("routeMarker["+i+"]: ");
+        console.log(routeMarker[i]);
         jsonImagePositionArray[i] = {
             l: routeMarker[i].position.k,
-            b: routeMarker[i].position.B,
+            b: routeMarker[i].position.D,
             h: thisHeading,
             dtp: thisDistanceToPrevious,
             dtn: thisDistanceToNext,
@@ -288,7 +290,7 @@ function sendVideoRequest()
         {  
             numberOfPoint = Math.ceil(Math.abs(angleBetweenPoints)/maxAngleBetweenPoints);
             newPoint = JSON.parse( JSON.stringify(jsonImagePositionArray[i]));//simplest way to clone
-            console.log("increment " + angleBetweenPoints/numberOfPoint);
+            //console.log("increment " + angleBetweenPoints/numberOfPoint);
             newPoint.h = to180((startAngle + (angleBetweenPoints/numberOfPoint))); //go back to [-180,180] scale
             if(angleBetweenPoints > 0.0){
                 newPoint.t = 'r';
@@ -296,7 +298,7 @@ function sendVideoRequest()
             else{
                 newPoint.t = 'l';
             }
-            console.log("gg ",newPoint.h);
+            //console.log("gg ",newPoint.h);
             jsonImagePositionArray.splice(i, 0, newPoint);
         }
     }   
@@ -312,6 +314,8 @@ function sendVideoRequest()
     //end test
     thisData = {id: thisJobId, points: jsonImagePositionArray};
     console.log("Number of point to download, after expansion: "+ jsonImagePositionArray.length);
+    console.log("Selected point:\n");
+    console.log(thisData);
     $.ajax(
             {
                 url: sendJobUrl,
@@ -593,6 +597,9 @@ function unlockMarkers()
 
 function streetViewCheckMarkerOk(data, marker)
 {
+    //Console.log("Punto: ");
+    //Console.log(data);
+    //Console.log(marker);
     marker.position = data.location.latLng;
     marker.lastValidPosition = data.location.latLng;
     streetViewCheckMarkerEnd(data, marker);
@@ -681,6 +688,8 @@ function calculateRoute()
                 }
             }
             console.log("Number of points before expansion: "+dataToElab.length);
+            console.log("Selected point:\n");
+            console.log(dataToElab);
             maxDistanceBetweenPoints = 10;
             for(i=1;i<dataToElab.length;i++)
             {
