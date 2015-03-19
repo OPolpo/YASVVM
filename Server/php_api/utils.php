@@ -5,12 +5,13 @@
     $url = "http://maps.googleapis.com/maps/api/streetview?size=640x640";
     $apikey = "AIzaSyCpG0qR__DoPmoI0rer8IQuIRa0wwdDDdM";
     $job_file_name = 'job.jb';
-    $frames_base_dir = 'frames/';
-    $yasvvm = './yasvvm';
-    $id_file = '.id';
-    $output_dir = 'video_out/';
+    $frames_base_dir = '../frames/';
+    $yasvvm = '../yasvvm';
+    $id_file = '../.id';
+    $output_dir = '../video_out/';
+    $abs_output_dir = 'YASVVM/video_out/';
     $output_file_extension = '.avi';
-    $resource_url = "10.0.0.43:8888/";
+    $resource_url = "http://10.10.1.111:8888/";
 
     
     function check_id($id){

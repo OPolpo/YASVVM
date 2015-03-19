@@ -2,9 +2,10 @@
     require_once 'utils.php';
     $id = $_POST["id"];
 
-    $file = $output_dir.$id.$output_file_extension;
+    $testfile = $output_dir.$id.$output_file_extension;
+    $file = $abs_output_dir.$id.$output_file_extension;
 
-    if(file_exists($file)){
+    if(file_exists($testfile)){
         $link = $resource_url.$file;
         json_ok($link);
     }

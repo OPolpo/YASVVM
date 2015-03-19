@@ -3,12 +3,13 @@
 //var baseUrl = "http://localhost/YASVVM/"; //mellowonpsx
 //var baseUrl = "http://10.0.0.43:8888/YASVVM/"; //Opolpo
 var baseUrl = "http://10.10.1.111:8888//YASVVM/"; //prove aula tutor
-var getIdUrl = baseUrl+"get_all_jobs_id.php";
-var getProgressUrl = baseUrl+"get_progress.php";
-var getDownloadUrl = baseUrl+"get_video_link.php";
-var getNewIdUrl = baseUrl+"get_new_job_id.php";
-var sendJobUrl = baseUrl+"set_job.php";
-var startJobUrl = baseUrl+"start_video_elaboration.php";
+var phpAPI = "/php_api/";
+var getIdUrl = baseUrl+phpAPI+"get_all_jobs_id.php";
+var getProgressUrl = baseUrl+phpAPI+"get_progress.php";
+var getDownloadUrl = baseUrl+phpAPI+"get_video_link.php";
+var getNewIdUrl = baseUrl+phpAPI+"get_new_job_id.php";
+var sendJobUrl = baseUrl+phpAPI+"set_job.php";
+var startJobUrl = baseUrl+phpAPI+"start_video_elaboration.php";
 // global variabiles
 var map = null;
 var streetViewService = null;
