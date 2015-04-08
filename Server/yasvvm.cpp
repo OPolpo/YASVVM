@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include "yasvvm.h"
 #include <string.h>
+#include <unistd.h>
 
 using namespace cv;
 using namespace std;
@@ -57,7 +58,7 @@ vector <string> read_directory(const string & path = string()){
     return result;
 }
 
-void add_frames(IplImage* a, IplImage* b, CvVideoWriter* writer, int sub_frame_number){
+void add_frames_linear(IplImage* a, IplImage* b, CvVideoWriter* writer, int sub_frame_number){
     //IplImage* interpoled = cvCreateImage(cvGetSize(b), b->depth, b->nChannels);
     //cvAddWeighted(a, 0.5, b, 0.5, 0.0, interpoled);
     cvWriteFrame(writer, a);
@@ -66,8 +67,8 @@ void add_frames(IplImage* a, IplImage* b, CvVideoWriter* writer, int sub_frame_n
     int i;
     for(i = 1; i < sub_frame_number+1; i++){
         IplImage* interpoled = cvCreateImage(cvGetSize(b), b->depth, b->nChannels);
-        cout << i/(sub_frame_number+1.0) << endl;
-        cout << 1-i/(sub_frame_number+1.0) << endl;
+        // cout << i/(sub_frame_number+1.0) << endl;
+        // cout << 1-i/(sub_frame_number+1.0) << endl;
         cvAddWeighted(a, 1 - i/(sub_frame_number+1.0), b, i/(sub_frame_number+1.0), 0.0, interpoled);
         cvWriteFrame(writer, interpoled);
     }
@@ -75,7 +76,7 @@ void add_frames(IplImage* a, IplImage* b, CvVideoWriter* writer, int sub_frame_n
 }
 
 
-int do_video(string image_path, string destination_path, int intermediate_frame){
+int do_video_linear(string image_path, string destination_path, int intermediate_frame){
     vector <string> files = read_directory(image_path);
 
     int isColor = 1;
@@ -109,7 +110,7 @@ int do_video(string image_path, string destination_path, int intermediate_frame)
             impress_turn_sign(f, turn);
 
         if(f_old != 0 && f !=0){
-            add_frames(f_old, f, writer, intermediate_frame);
+            add_frames_linear(f_old, f, writer, intermediate_frame);
         }
 
         cvReleaseImage(&f_old);
@@ -120,11 +121,60 @@ int do_video(string image_path, string destination_path, int intermediate_frame)
     return 0;
 }
 
+int do_video_motion(string image_path, string destination_path, int fps_ext){
+    vector <string> files = read_directory(image_path);
+
+    int isColor = 1;
+    int fps     = 24;
+    int frameW  = WIDTH;
+    int frameH  = HEIGHT;
+    CvSize size;
+    
+    size.width = frameW;
+    size.height = frameH;
+    String filepathtmp (destination_path);
+    filepathtmp += ".tmp";
+    CvVideoWriter* writer = cvCreateVideoWriter(filepathtmp.c_str(), CV_FOURCC('m','p','4','v'), fps, size, isColor);
+    IplImage* f = 0;
+
+    string base_link (image_path);
+    string link;
+    string filename;
+    int turn = 0;
+    unsigned long i;
+    for (i = 0; i < files.size();){
+        filename = files.at(i).c_str();         
+        cout << filename << endl;
+
+        link = base_link + files.at(i++).c_str();
+        f = cvLoadImage(link.c_str(), CV_LOAD_IMAGE_COLOR);
+        
+        turn = detect_turn(filename);
+        if(turn)
+            impress_turn_sign(f, turn);
+        cvWriteFrame(writer, f);
+    }
+    cvReleaseVideoWriter(&writer);
+    //butterflow call
+    String filepathtmp2(destination_path + ".tmp2");
+    String sys_call;
+    sys_call = sys_call + "/usr/local/bin/butterflow " + "-o " + filepathtmp2.c_str() + " --no-preview " + "--playback-rate " + to_string(fps_ext) +" "+ filepathtmp;
+    system(sys_call.c_str());
+
+    remove(filepathtmp.c_str());
+    rename(filepathtmp2.c_str(), destination_path.c_str());
+    return 0;
+}
+
+
 int main(int const argc, const char ** const argv){
-    if(argc != 4)
+    if(argc != 5)
         exit(EXIT_FAILURE);
-		cout << atoi(argv[3]) << endl;
-    do_video(argv[1], argv[2], atoi(argv[3]));
+	cout << atoi(argv[3]) << endl;
+    if(argv[4][0] == 'l')
+        do_video_linear(argv[1], argv[2], atoi(argv[3]));
+    if(argv[4][0] == 'm')
+        do_video_motion(argv[1], argv[2], atoi(argv[3]));
     cvReleaseImage(&turn_right_image);
     cvReleaseImage(&turn_left_image);
     return 0;

@@ -11,7 +11,7 @@
     $output_dir = '../video_out/';
     $abs_output_dir = 'YASVVM/video_out/';
     $output_file_extension = '.avi';
-    $resource_url = "http://10.10.1.111:8888/";
+    $resource_url = "http://localhost:8888/";
 
     
     function check_id($id){
