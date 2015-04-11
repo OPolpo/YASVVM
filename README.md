@@ -30,21 +30,21 @@ Move the yasvvm binary and the php\_api directory onto webserver ad create also 
 ├── .DS_Store
 ├── .id
 ├── frames
-├── php\_api
+├── php_api
 │   ├── delete_job.php
-│   ├── do\_job.php
-│   ├── do\_jobz.php
+│   ├── do_job.php
+│   ├── do_jobz.php
 │   ├── errors.php
-│   ├── get\_all\_jobs_id.php
-│   ├── get\_all\_video_link.php
-│   ├── get\_new\_job_id.php
-│   ├── get\_progress.php
-│   ├── get\_video\_link.php
+│   ├── get_all_jobs_id.php
+│   ├── get_all_video_link.php
+│   ├── get_new_job_id.php
+│   ├── get_progress.php
+│   ├── get_video_link.php
 │   ├── left.jpg
 │   ├── right.jpg
-│   ├── set\_job.php
-│   ├── start\_video\_elaboration.php
+│   ├── set_job.php
+│   ├── start_video_elaboration.php
 │   └── utils.php
-├── video\_out
+├── video_out
 └── yasvvm
 ```
