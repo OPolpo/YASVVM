@@ -9,6 +9,3 @@ all: $(BIN)
 
 $(BIN): $(SRC)
 	$(CC) -o $@ $(CFLAGS) $^ $(LIBS)
-
-install: $(BIN)
-	mv $(BIN) /Applications/MAMP/htdocs/YASVVM/
